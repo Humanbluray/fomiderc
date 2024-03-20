@@ -1,0 +1,109 @@
+import flet as ft
+
+title_container_style: dict = dict(
+    border=ft.border.all(1, color="#ebebeb"),
+    padding=ft.padding.only(left=10, right=10, top=5, bottom=5),
+    border_radius=8,
+)
+filter_container_style: dict = dict(
+    # expand=True,
+    padding=ft.padding.only(left=10, right=10, top=20, bottom=20),
+    border=ft.border.all(1, color="#ebebeb"),
+    border_radius=8,
+)
+table_container_style: dict = dict(
+    # expand=True,
+    padding=ft.padding.only(left=5, right=5, top=2, bottom=2),
+    border=ft.border.all(1, color="#ebebeb"),
+    border_radius=8,
+)
+filter_name_style: dict = dict(
+    width=400,
+    label="Nom du client",
+    height=40, dense=True,
+    text_style=ft.TextStyle(size=12, font_family="Poppins Medium", color=ft.colors.BLACK87),
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium", color=ft.colors.BLACK87),
+)
+table_factures_style: dict = dict(
+    columns=[
+        ft.DataColumn(ft.Text('facture', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('montant', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('Perçu', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('reste', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('statut', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('icone', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+    ],
+    rows=[]
+)
+table_details_factures_style: dict = dict(
+    columns=[
+        ft.DataColumn(ft.Text('reference', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('designation', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('qté', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('prix', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('total', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+    ],
+    rows=[]
+)
+infos_style: dict = dict(
+    width=200,
+    multiline=True,
+    height=50,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    border_radius=6,
+    text_size=14,
+    content_padding=12
+)
+new_cli_style: dict = dict(
+    width=300,
+    multiline=True,
+    height=50,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    border_radius=6,
+    text_size=14,
+    content_padding=12
+)
+contact_style: dict = dict(
+    width=300,
+    multiline=True,
+    height=80,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    border_radius=6,
+    text_size=14,
+    content_padding=12,
+    prefix_text="+237 ",
+    max_length=9
+)
+initiales_style: dict = dict(
+    width=100,
+    multiline=True,
+    height=80,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    border_radius=6,
+    text_size=14,
+    content_padding=12,
+    max_length=3
+)
+courrier_style: dict = dict(
+    width=300,
+    multiline=True,
+    height=50,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    border_radius=6,
+    text_size=14,
+    content_padding=12
+)
