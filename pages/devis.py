@@ -468,6 +468,7 @@ class Devis(ft.UserControl):
 
     # first content stack
     def load_devis_list(self):
+        # chargement des devis
         for name in backend.all_devis():
             self.search_devis.options.append(
                 ft.dropdown.Option(name)

@@ -208,6 +208,7 @@ class Factures(ft.UserControl):
 
     # first content stack
     def load_facture_list(self):
+        # chargement des factures
         for name in backend.all_factures():
             self.search_facture.options.append(
                 ft.dropdown.Option(name)

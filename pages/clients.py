@@ -145,7 +145,7 @@ class Clients(ft.UserControl):
                 ft.FilledTonalButton(text="fermer", on_click=self.close_new_cli_window, height=50)
             ]
         )
-        # fenetre pour modifier client
+        # fenetre pour modifier client _________________________________________________________________
         self.m_cli_id = ft.TextField(**new_cli_style, label="id", disabled=True)
         self.m_cli_nom = ft.TextField(**new_cli_style, label="Nom")
         self.m_cli_rcmm = ft.TextField(**new_cli_style, label="RCMM")
@@ -175,7 +175,7 @@ class Clients(ft.UserControl):
         )
         self.load_clients_list()
 
-    # functions
+    # functions _______________________________________________________________________________________________________________________________
     def switch_page(self, e):
         pages = [
             "stocks", "clients", "fournisseurs", "commandes",

@@ -250,7 +250,7 @@ class Commandes(ft.UserControl):
         self.load_all_fournisseurs()
         self.load_edit_ref_list()
 
-    # functions
+    # functions __________________________________________________________________________________________
     def switch_page(self, e):
         pages = [
             "stocks", "clients", "fournisseurs", "commandes",

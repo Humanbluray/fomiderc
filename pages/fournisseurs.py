@@ -168,7 +168,7 @@ class Fournisseurs(ft.UserControl):
         self.load_fournisseurs_list()
         self.fill_command_table()
 
-    # functions
+    # functions ___________________________________________________________________________________________________
     def switch_page(self, e):
         pages = [
             "stocks", "clients", "fournisseurs", "commandes",

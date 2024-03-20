@@ -7,6 +7,7 @@ initiales_entreprise = "FMD"
 
 
 def connexion_base():
+    # create the database
     conn = sql.connect(my_base)
     cur = conn.cursor()
 

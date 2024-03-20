@@ -245,7 +245,7 @@ class Stocks(ft.UserControl):
         self.fill_table()
         self.load_refs()
 
-    # functions
+    # functions ______________________________________________________________________________________________
     def switch_page(self, e):
         pages = [
             "stocks", "clients", "fournisseurs", "commandes",

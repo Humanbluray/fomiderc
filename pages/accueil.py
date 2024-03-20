@@ -61,6 +61,7 @@ class Accueil(ft.UserControl):
                 self.alert.update()
 
     def check_connexion(self, e):
+        # connexion
         if backend.find_user_password(self.login.value) == self.password.value:
             self.check_password_icon.scale = 1
         else:
