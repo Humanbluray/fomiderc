@@ -10,7 +10,12 @@ class Accueil(ft.UserControl):
         self.login = ft.TextField(**loginstyle)
         self.password = ft.TextField(**passwordstyle, on_change=self.check_connexion)
         self.check_password_icon = ft.Icon(**check_password_icon_style)
-        self.button = ft.ElevatedButton(**button_connect_style, on_click=self.connect)
+        self.button = ft.ElevatedButton(
+            **button_connect_style,
+            on_click=self.connect,
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+            content=ft.Text("Connecter", size=14, font_family="Poppins Bold")
+        )
         self.alert = ft.AlertDialog(
             title=ft.Text("Erreur", size=20, weight=ft.FontWeight.BOLD),
             content=ft.Row(
@@ -33,7 +38,7 @@ class Accueil(ft.UserControl):
                 expand=True,
                 height=700,
                 controls=[
-                    ft.Text("Enter user account", size=20, style=ft.TextThemeStyle.LABEL_MEDIUM),
+                    ft.Text("Login", size=24, font_family="Poppins Bold"),
                     ft.Divider(height=2, color="transparent"),
                     self.login,
                     self.password,

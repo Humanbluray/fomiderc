@@ -2,7 +2,7 @@ import backend
 from styles.commandeStyleSheet import *
 from others.useful_fonctions import milSep, ecrire_en_lettres
 from datetime import date, datetime
-
+import pandas
 
 class Commandes(ft.UserControl):
     def __init__(self, page):
@@ -100,6 +100,18 @@ class Commandes(ft.UserControl):
                 scroll=ft.ScrollMode.ADAPTIVE,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         )
+        self.save_commandes = ft.FilePicker(on_result=self.extract_commandes)
+        self.save_details_com = ft.FilePicker(on_result=self.extract_details_commandes)
+        self.ct_extractions= ft.Container(
+            **menu_container_style,
+            content=ft.Row(
+                [
+                    ft.Text("Extractions excel", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb")),
+                    ft.IconButton(ft.icons.UPLOAD_FILE_OUTLINED, tooltip="extraction excel des commandes", on_click=lambda e: self.save_commandes.save_file()),
+                    ft.IconButton(ft.icons.FILE_OPEN, tooltip="extraction excel des details de commandes", on_click=lambda e: self.save_details_com.save_file()),
+                ]
+            )
+        )
         # Stack ecran de creatiuon de commande________________________________________________________
         self.n_com = ft.TextField(**infos_style, disabled=True)
         self.n_fournisseur = ft.Dropdown(**drop_style, label="Fournisseur", on_change=self.on_change_new_fournisseur)
@@ -123,7 +135,7 @@ class Commandes(ft.UserControl):
         self.total_lettres = ft.TextField(**lettres_style, disabled=True)
         self.button_add = ft.ElevatedButton(
             icon=ft.icons.ADD, text="Ajouter",
-            icon_color="white", color="white", height=40,
+            icon_color="white", color="white", height=50,
             bgcolor=ft.colors.BLACK87,
             on_click=self.add_table_line
         )
@@ -223,11 +235,11 @@ class Commandes(ft.UserControl):
             ),
             actions=[
                 ft.ElevatedButton(
-                    text="Valider réception", color="white", bgcolor="red", height=40,
+                    text="Valider réception", color="white", bgcolor="red", height=50,
                     icon=ft.icons.INVENTORY_OUTLINED, icon_color="white", on_click=self.create_receipt
                 ),
                 ft.FilledTonalButton(
-                    text="fermer", height=40, on_click=self.close_receipt_window
+                    text="fermer", height=50, on_click=self.close_receipt_window
                 )
             ]
         )
@@ -237,13 +249,13 @@ class Commandes(ft.UserControl):
         self.error_box = ft.AlertDialog(
             title=ft.Text("Erreur"),
             content=self.error_text,
-            actions=[ft.FilledTonalButton(text="Fermer", on_click=self.close_error_box)]
+            actions=[ft.FilledTonalButton(text="Fermer", on_click=self.close_error_box, height=50)]
         )
         self.confirmation_text = ft.Text("", style=ft.TextStyle(color="red", font_family="Poppins Regular", size=14))
         self.confirmation_box = ft.AlertDialog(
             title=ft.Text("Confirmation"),
             content=self.confirmation_text,
-            actions=[ft.FilledTonalButton(text="Fermer", on_click=self.close_confirmation_box)]
+            actions=[ft.FilledTonalButton(text="Fermer", on_click=self.close_confirmation_box, height=50)]
         )
         # Fonctions à charger sans évènements
         self.load_all_commandes()
@@ -257,6 +269,59 @@ class Commandes(ft.UserControl):
             "devis", "factures"
         ]
         self.page.go(f"/{pages[e.control.selected_index]}")
+
+    @staticmethod
+    def extract_commandes(e: ft.FilePickerResultEvent):
+        commandes = backend.all_commandes()
+        numeros = []
+        dates = []
+        fournisseurs = []
+        montants = []
+        statuts = []
+        for row in commandes:
+            numeros.append(row[0])
+            dates.append(row[1])
+            fournisseurs.append(row[2])
+            montants.append(row[3])
+            statuts.append(row[4])
+        data_set = {
+            "numéro": numeros, "date": dates, "fournisseur": fournisseurs,
+            'montant': montants, "statut": statuts
+        }
+
+        df = pandas.DataFrame(data_set)
+
+        save_location = e.path
+        if save_location:
+            excel = pandas.ExcelWriter(save_location)
+            df.to_excel(excel, sheet_name="Feuil 1")
+            excel.close()
+
+    @staticmethod
+    def extract_details_commandes(e: ft.FilePickerResultEvent):
+        commandes = backend.all_commande_details()
+        numeros = []
+        refs = []
+        qtes = []
+        prix = []
+        for row in commandes:
+            numeros.append(row[0])
+            refs.append(row[1])
+            qtes.append(row[2])
+            prix.append(row[3])
+
+        data_set = {
+            "numéro": numeros, "reference": refs, "qte": qtes,
+            'prix': prix
+        }
+
+        df = pandas.DataFrame(data_set)
+
+        save_location = e.path
+        if save_location:
+            excel = pandas.ExcelWriter(save_location)
+            df.to_excel(excel, sheet_name="Feuil 1")
+            excel.close()
 
     def open_new_commande_window(self, e):
         self.new_commande_window.scale = 1
@@ -526,6 +591,7 @@ class Commandes(ft.UserControl):
                                         self.filter_container,
                                         self.infos_container,
                                         self.commande_container,
+                                        self.ct_extractions
                                     ]
                                 )
                             ]
@@ -536,7 +602,9 @@ class Commandes(ft.UserControl):
                     self.error_box,
                     self.confirmation_box,
                     self.receipt_window,
-                    self.date_picker
+                    self.date_picker,
+                    self.save_commandes,
+                    self.save_details_com
                 ]
             )
         )

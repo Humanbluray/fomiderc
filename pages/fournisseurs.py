@@ -195,7 +195,7 @@ class Fournisseurs(ft.UserControl):
                             ft.DataCell(ft.Text(data[1].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
                             ft.DataCell(ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
                             ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(ft.Icon(ft.icons.RADIO_BUTTON_CHECKED_OUTLINED, color=ft.colors.RED_300))
+                            ft.DataCell(ft.Icon(ft.icons.CIRCLE, color=ft.colors.RED_300))
                         ],
                         on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
                     )
@@ -211,7 +211,7 @@ class Fournisseurs(ft.UserControl):
                             ft.DataCell(
                                 ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
                             ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(ft.Icon(ft.icons.CHECK_CIRCLE_OUTLINE, color="green"))
+                            ft.DataCell(ft.Icon(ft.icons.CIRCLE, color="green"))
                         ],
                         on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
                     )
@@ -250,7 +250,7 @@ class Fournisseurs(ft.UserControl):
                                     ft.DataCell(ft.Text(data["date"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                     ft.DataCell(ft.Text(data["fournisseur"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                     ft.DataCell(ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                    ft.DataCell(ft.Icon(ft.icons.RADIO_BUTTON_CHECKED_OUTLINED, color=ft.colors.RED_300))
+                                    ft.DataCell(ft.Icon(ft.icons.CIRCLE, color=ft.colors.RED_300))
                                 ],
                                 on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
                             )
@@ -268,7 +268,7 @@ class Fournisseurs(ft.UserControl):
                                                         style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                     ft.DataCell(ft.Text(data["montant"],
                                                         style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                    ft.DataCell(ft.Icon(ft.icons.CHECK_CIRCLE_OUTLINE, color="green"))
+                                    ft.DataCell(ft.Icon(ft.icons.CIRCLE, color="green"))
                                 ],
                                 on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
                             )
@@ -300,7 +300,7 @@ class Fournisseurs(ft.UserControl):
                                 ft.DataCell(
                                     ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                 ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Icon(ft.icons.RADIO_BUTTON_CHECKED_OUTLINED, color=ft.colors.RED_300))
+                                ft.DataCell(ft.Icon(ft.icons.CIRCLE, color=ft.colors.RED_300))
                             ],
                             on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
                         )
@@ -320,7 +320,7 @@ class Fournisseurs(ft.UserControl):
                                             style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                 ft.DataCell(
                                     ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Icon(ft.icons.CHECK_CIRCLE_OUTLINE, color="green"))
+                                ft.DataCell(ft.Icon(ft.icons.CIRCLE, color="green"))
                             ],
                             on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
                         )

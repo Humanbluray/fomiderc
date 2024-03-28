@@ -248,3 +248,11 @@ payment_mode_style: dict = dict(
     text_style=ft.TextStyle(size=12, font_family="Poppins Medium", color=ft.colors.BLACK87),
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium", color=ft.colors.BLACK87),
 )
+table_paiements_style: dict = dict(
+    columns=[
+        ft.DataColumn(ft.Text('montant', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('type', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('date', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+    ],
+    rows=[]
+)

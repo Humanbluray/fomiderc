@@ -42,11 +42,8 @@ check_password_icon_style: dict = dict(
     animate_scale=ft.animation.Animation(600, ft.AnimationCurve.BOUNCE_OUT)
 )
 button_connect_style: dict = dict(
-    text="Connecter",
-    icon=ft.icons.DATASET_LINKED_OUTLINED,
     height=50,
-    width=300,
-    icon_color=ft.colors.WHITE,
+    width=200,
     color="white",
     bgcolor=ft.colors.BLACK87,
     elevation=10,

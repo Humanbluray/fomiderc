@@ -1,5 +1,6 @@
 import backend
 from styles.stocksStyleSheets import *
+import pandas
 
 
 class Stocks(ft.UserControl):
@@ -156,6 +157,10 @@ class Stocks(ft.UserControl):
         self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier référence", on_click=self.open_edit_article_window)
         self.achat = ft.IconButton(icon=ft.icons.ADD_CARD_OUTLINED, tooltip="Entrée directe", on_click=self.open_achat_window)
         self.delete = ft.IconButton(icon=ft.icons.DELETE_OUTLINED, tooltip="supprimer référence", on_click=self.delete_reference)
+        self.save_me = ft.FilePicker(on_result=self.extraire_stock)
+        self.stock_bt = ft.IconButton(ft.icons.UPLOAD_FILE_OUTLINED, tooltip="Extraction excel du stock", on_click=lambda e: self.save_me.save_file())
+        self.save_histo = ft.FilePicker(on_result=self.extraire_historique)
+        self.histo_bt = ft.IconButton(ft.icons.FILE_OPEN, tooltip="Extraction excel de l'historique", on_click=lambda e: self.save_histo.save_file())
 
         # actions achat direct_______________________________________________________
         self.a_ref = ft.Dropdown(**achat_ref_style, on_change=self.on_change_achat_ref)
@@ -191,9 +196,9 @@ class Stocks(ft.UserControl):
             ]
         )
 
-        # Menu containers ___________________________________________________________
+        # Menu conteneur ___________________________________________________________
 
-        # Table containers ______________________________________________________________________________
+        # Table conteneur ______________________________________________________________________________
         self.table_container = ft.Container(
             **table_container_style,
             content=ft.Column(
@@ -222,7 +227,7 @@ class Stocks(ft.UserControl):
                 ]
             )
         )
-        # end containers _______________________________________________________________
+        # end conteneur _______________________________________________________________
         self.no_historic = ft.Text(value="Pas d'histoqrique", visible=False, style=ft.TextStyle(size=14, font_family="Poppins ExtraBold", color="red"))
         self.info_histo = ft.Text("    Historique de", style=ft.TextStyle(color="grey", size=12, font_family="Poppins Medium"))
         self.histo_table = ft.DataTable(**table_histo_style)
@@ -275,7 +280,7 @@ class Stocks(ft.UserControl):
                         ft.DataCell(
                             ft.Text(data["nature"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
                         ft.DataCell(ft.Text(data["qté"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["prix"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(ft.Text(f"{data['prix']}", style=ft.TextStyle(font_family="poppins Medium", size=11))),
                         ft.DataCell(ft.Text(data["unité"], style=ft.TextStyle(font_family="poppins Medium", size=11)))
                     ],
                     on_select_changed=lambda e: self.select_ref(e.control.cells[0].content.value,
@@ -316,7 +321,7 @@ class Stocks(ft.UserControl):
                                 ft.DataCell(
                                     ft.Text(data["qté"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                 ft.DataCell(
-                                    ft.Text(data["prix"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                    ft.Text(f"{data['prix']}", style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                 ft.DataCell(
                                     ft.Text(data["unité"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
                             ],
@@ -352,7 +357,7 @@ class Stocks(ft.UserControl):
                                 ft.DataCell(
                                     ft.Text(data["qté"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                 ft.DataCell(
-                                    ft.Text(data["prix"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                    ft.Text(f"{data['prix']}", style=ft.TextStyle(font_family="poppins Medium", size=11))),
                                 ft.DataCell(
                                     ft.Text(data["unité"], style=ft.TextStyle(font_family="poppins Medium", size=11)))
                             ],
@@ -484,7 +489,7 @@ class Stocks(ft.UserControl):
             self.confirm.visible = True
             self.confirm.update()
         else:
-            backend.update_ref_by_name(self.m_ref2.value, self.m_des2.value, ref_id)
+            backend.update_ref_by_name(self.m_des2.value, ref_id)
             self.confirm.visible = True
             self.confirm.update()
             self.m_ref2.disabled = True
@@ -582,6 +587,66 @@ class Stocks(ft.UserControl):
             self.dialog_box.update()
             self.fill_table()
 
+    @staticmethod
+    def extraire_stock(e: ft.FilePickerResultEvent):
+        refs = []
+        des = []
+        types = []
+        qtes = []
+        prix = []
+        unites = []
+        stock = backend.all_articles()
+        for row in stock:
+            refs.append(row[1])
+            des.append(row[2])
+            types.append(row[3])
+            qtes.append(row[4])
+            prix.append(row[5])
+            unites.append(row[6])
+
+        data_set = {
+            "reference": refs, "designation": des, "type": types,
+            "qté": qtes, "prix": prix, "unité": unites
+        }
+        df = pandas.DataFrame(data_set)
+
+        save_location = e.path
+        if save_location:
+            excel = pandas.ExcelWriter(save_location)
+            df.to_excel(excel, sheet_name="Feuil 1")
+            excel.close()
+
+    @staticmethod
+    def extraire_historique(e: ft.FilePickerResultEvent):
+        refs = []
+        dates = []
+        mvts = []
+        numeros = []
+        qte_avts = []
+        qtes = []
+        qte_apres = []
+        historiques = backend.all_historique()
+        for row in historiques:
+            refs.append(row[1])
+            dates.append(row[2])
+            mvts.append(row[3])
+            numeros.append(row[4])
+            qte_avts.append(row[5])
+            qtes.append(row[6])
+            qte_apres.append(row[7])
+
+        data_set= {
+            "reference": refs, "date": dates, "mouvement": mvts,
+            "numero": numeros, "qté avant": qte_avts,
+            "qté": qtes, "qté après": qte_apres
+        }
+        df = pandas.DataFrame(data_set)
+        save_location = e.path
+        if save_location:
+            excel = pandas.ExcelWriter(save_location)
+            df.to_excel(excel, sheet_name="Feuil 1")
+            excel.close()
+
     def build(self):
         return ft.Container(
             expand=True,
@@ -608,6 +673,14 @@ class Stocks(ft.UserControl):
                                 ],
                                 vertical_alignment=ft.CrossAxisAlignment.START
                             ),
+                            ft.Row(
+                                [
+                                    ft.Text(
+                                        "Extractions",
+                                        style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb")
+                                    ),
+                                    self.stock_bt, self.save_me, self.histo_bt, self.save_histo
+                                ], alignment="starf"),
 
                             self.new_article_window,
                             self.edit_article_window,

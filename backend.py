@@ -1014,6 +1014,16 @@ def all_historique_by_ref(reference):
     return result
 
 
+def all_historique():
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT * FROM historique""")
+    result = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return result
+
+
 def nb_achats():
     con = sql.connect(my_base)
     cur = con.cursor()
@@ -1296,6 +1306,16 @@ def commande_details_by_num(numero):
     return result
 
 
+def all_commande_details():
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT numero, reference, qte, prix FROM commande_details""")
+    result = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return result
+
+
 # table receptions ___________________________________________________________________________
 def add_reception(numero, bl_client, commande, date):
     conn = sql.connect(my_base)
@@ -1321,6 +1341,26 @@ def find_recept_num_by_command(command):
     conn.commit()
     conn.close()
     return result
+
+
+def montant_paiements_par_facture(facture_num):
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT sum(montant) FROM reglement WHERE facture =?""", (facture_num, ))
+    res = cur.fetchone()
+    conn.commit()
+    conn.close()
+    return res[0]
+
+
+def reglements_par_facture(facture_num):
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT montant, type, date FROM reglement WHERE facture =?""", (facture_num, ))
+    res = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return res
 
 
 def func():

@@ -104,6 +104,17 @@ class Factures(ft.UserControl):
                 scroll=ft.ScrollMode.ADAPTIVE,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         )
+        self.table_paiments = ft.DataTable(**table_paiements_style)
+        self.table_paiments_container = ft.Container(
+            **table_container_style,
+            expand=True,
+            height=250, width=300,
+            content=ft.Column(
+                expand=True,
+                height=250,
+                controls=[self.table_paiments]
+            )
+        )
         # impressions options _____________________________________________________________________
         self.options = ft.RadioGroup(
             content=ft.Row(
@@ -272,6 +283,30 @@ class Factures(ft.UserControl):
         self.total.update()
         self.m_facture.update()
 
+        # table des paiements
+        for row in self.table_paiments.rows[:]:
+            self.table_paiments.rows.remove(row)
+
+        datas = []
+        for item in backend.reglements_par_facture(self.search_facture.value):
+            dico = {"montant": item[0], "type": item[1], "date": item[2]}
+            datas.append(dico)
+
+        for data in datas:
+            self.table_paiments.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(
+                            ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(
+                            ft.Text(data["type"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(
+                            ft.Text(data["date"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                    ]
+                )
+            )
+        self.table_paiments.update()
+
     def close_payment_window(self, e):
         self.payment_window.open = False
         self.payment_window.update()
@@ -280,8 +315,11 @@ class Factures(ft.UserControl):
         if self.search_facture.value is None or self.search_facture.value == "":
             pass
         else:
-            self.payment_window.open = True
-            self.payment_window.update()
+            if backend.montant_paiements_par_facture(self.search_facture.value) == backend.show_info_factures(self.search_facture.value)[3]:
+                pass
+            else:
+                self.payment_window.open = True
+                self.payment_window.update()
 
     def check_solde(self, e):
         if self.check.value is True:
@@ -1054,7 +1092,7 @@ class Factures(ft.UserControl):
                                         ft.Container(**title_container_style, content=self.title_page),
                                         self.filter_container,
                                         self.infos_container,
-                                        self.facture_container,
+                                        ft.Row([self.facture_container, self.table_paiments_container]),
                                         self.options_container,
                                     ]
                                 )

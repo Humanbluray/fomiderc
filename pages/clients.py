@@ -81,11 +81,11 @@ class Clients(ft.UserControl):
         self.table_factures_container = ft.Container(
             **table_container_style,
             expand=True,
-            height=210,
+            height=250,
             content=ft.Column(
                 [self.table_factures, self.data_not_found],
                 expand=True,
-                height=210, width=600,
+                height=250, width=600,
                 scroll=ft.ScrollMode.ADAPTIVE,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
             )
@@ -96,11 +96,22 @@ class Clients(ft.UserControl):
         self.table_details_factures_container = ft.Container(
             **table_container_style,
             expand=True,
-            height=210, width=600,
+            height=250, width=650,
             content=ft.Column(
                 expand=True,
-                height=210,
+                height=250,
                 controls=[self.table_details_facture]
+            )
+        )
+        self.table_paiments = ft.DataTable(**table_paiements_style)
+        self.table_paiments_container = ft.Container(
+            **table_container_style,
+            expand=True,
+            height=250, width=350,
+            content=ft.Column(
+                expand=True,
+                height=250,
+                controls=[self.table_paiments]
             )
         )
         # Widgets des news container ___________________________________________________________________________
@@ -288,6 +299,29 @@ class Clients(ft.UserControl):
             )
         self.table_details_facture.update()
 
+        # table des paiements
+        for row in self.table_paiments.rows[:]:
+            self.table_paiments.rows.remove(row)
+
+        datas = []
+        for item in backend.reglements_par_facture(selected_facture):
+            dico = {"montant": item[0], "type": item[1], "date": item[2]}
+            datas.append(dico)
+
+        for data in datas:
+            self.table_paiments.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(
+                            ft.Text(data["type"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(
+                            ft.Text(data["date"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                    ]
+                )
+            )
+        self.table_paiments.update()
+
     def open_new_cli_window(self, e):
         self.new_cli_window.open = True
         self.new_cli_window.update()
@@ -399,7 +433,7 @@ class Clients(ft.UserControl):
                                 controls=[
                                     ft.Row([self.table_factures_container, self.news_container], vertical_alignment=ft.CrossAxisAlignment.START),
                                     self.info_detfac,
-                                    ft.Row([self.table_details_factures_container])
+                                    ft.Row([self.table_details_factures_container, self.table_paiments_container])
                                 ]
                             ),
                             self.new_cli_window, self.edit_cli_window

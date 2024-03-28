@@ -35,6 +35,14 @@ table_factures_style: dict = dict(
     ],
     rows=[]
 )
+table_paiements_style: dict = dict(
+    columns=[
+        ft.DataColumn(ft.Text('montant', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('type', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+        ft.DataColumn(ft.Text('date', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
+    ],
+    rows=[]
+)
 table_details_factures_style: dict = dict(
     columns=[
         ft.DataColumn(ft.Text('reference', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
