@@ -127,6 +127,7 @@ class Factures(ft.UserControl):
                 ]
             )
         )
+
         self.print_button = ft.IconButton(
             icon=ft.icons.SAVE, tooltip="imprimer devis",
             on_click=self.imprimer
