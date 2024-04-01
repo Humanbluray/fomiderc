@@ -230,16 +230,16 @@ def find_devis_num(id_client):
     ini_cli = search_initiales(id_client)
 
     if resultat[0] is None or resultat[0] == 0:
-        r_final = initiales_entreprise + "/DV/" + ini_cli + "001"
+        r_final = ini_cli + "001/" + initiales_entreprise + "/DV"
     else:
         if int(resultat[0]) < 10:
-            r_final = initiales_entreprise + "/DV/" + ini_cli + "00" + str(resultat[0] + 1)
+            r_final = ini_cli + "00" + str(resultat[0] + 1) + "/" + initiales_entreprise + "/DV"
 
         elif 10 < int(resultat[0]) < 100:
-            r_final = initiales_entreprise + "/DV/" + ini_cli + "0" + str(resultat[0] + 1)
+            r_final = ini_cli + "0" + str(resultat[0] + 1) + "/" + initiales_entreprise + "/DV"
 
         else:
-            r_final = initiales_entreprise + "/DV/" + ini_cli + str(resultat[0] + 1)
+            r_final = ini_cli + str(resultat[0] + 1) + "/" + initiales_entreprise + "/DV"
 
     conn.commit()
     conn.close()
@@ -526,16 +526,16 @@ def find_facture_num(id_client):
     ini_cli = search_initiales(id_client)
 
     if resultat[0] == 0:
-        r_final = initiales_entreprise + "/FA/" + ini_cli + "001"
+        r_final = ini_cli + "001" + "/" + initiales_entreprise + "/FA"
     else:
         if resultat[0] < 10:
-            r_final = initiales_entreprise + "/FA/" + ini_cli + "00" + str(resultat[0] + 1)
+            r_final = ini_cli + "00" + str(resultat[0] + 1) + "/" + initiales_entreprise + "/FA"
 
         elif 10 < resultat[0] < 100:
-            r_final = initiales_entreprise + "/FA/" + ini_cli + "0" + str(resultat[0] + 1)
+            r_final = ini_cli + "0" + str(resultat[0] + 1) + "/" + initiales_entreprise + "/FA"
 
         else:
-            r_final = initiales_entreprise + "/FA/" + ini_cli + str(resultat[0] + 1)
+            r_final = ini_cli + str(resultat[0] + 1) + "/" + initiales_entreprise + "/FA"
     conn.commit()
     conn.close()
     return r_final
@@ -1278,13 +1278,13 @@ def create_numero_commande(id_fournisseur):
     initiales = infos_fournisseur_by_id(id_fournisseur)[2]
     nombre = nb_commandes_by_fournisseur(id_fournisseur)
     if nombre == 0:
-        numero = f"FMD/CMD/{initiales}001"
+        numero = f"{initiales}001/FMD/CMD"
     elif nombre < 10:
-        numero = f"FMD/CMD/{initiales}00{nombre + 1}"
+        numero = f"{initiales}00{nombre + 1}FMD/CMD/"
     elif 10 < nombre < 99:
-        numero = f"FMD/CMD/{initiales}0{nombre + 1}"
+        numero = f"{initiales}0{nombre + 1}FMD/CMD/"
     else:
-        numero = f"FMD/CMD/{initiales}{nombre + 1}"
+        numero = f"{initiales}{nombre + 1}FMD/CMD/"
     return numero
 
 

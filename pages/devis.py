@@ -1,10 +1,8 @@
-from tkinter.filedialog import asksaveasfilename
 import backend
 from styles.devisStyleSheet import *
 from others.useful_fonctions import *
 from datetime import date
 import os
-# import openpyxl
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4
@@ -66,7 +64,8 @@ class Devis(ft.UserControl):
         self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
         self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer devis", on_click=self.open_new_devis_window)
         self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier devis", on_click=self.open_edit_devis_window)
-        self.delivery = ft.IconButton(icon=ft.icons.PRINT_OUTLINED, tooltip="imprimer bordereau livraison", on_click=self.imprimer_bordereau)
+        self.fp = ft.FilePicker(on_result=self.imprimer_bordereau)
+        self.delivery = ft.IconButton(icon=ft.icons.PRINT_OUTLINED, tooltip="imprimer bordereau livraison", on_click=lambda e: self.fp.save_file())
         self.bill = ft.IconButton(icon=ft.icons.EURO_OUTLINED, tooltip="facturer", on_click=self.facturer_devis)
         self.delete = ft.IconButton(icon=ft.icons.DELETE_OUTLINED, tooltip="supprimer devis", on_click=self.delete_devis)
 
@@ -75,7 +74,7 @@ class Devis(ft.UserControl):
             content=ft.Row(
                 [
                     ft.Row([self.filtre, self.search_devis, self.client_id]),
-                    ft.Row([self.actions, self.add, self.edit, self.delivery, self.bill, self.delete])
+                    ft.Row([self.actions, self.add, self.edit, self.delivery, self.bill, self.delete, self.fp])
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             )
@@ -109,26 +108,22 @@ class Devis(ft.UserControl):
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         )
         # impressions options _____________________________________________________________________
-        self.options = ft.RadioGroup(
-            content=ft.Row(
-                spacing=5,
-                controls=[
-                    ft.Radio(value="etat", label="Etat(TVA, IR, NAP)", active_color=ft.colors.BLACK87),
-                    ft.Radio(value="personnel", label="particulier(sans taxes)", active_color=ft.colors.BLACK87),
-                    ft.Radio(value="tva", label="avec TVA (seule)", active_color=ft.colors.BLACK87),
-                    ft.Radio(value="ir", label="avec IR sans NAP", active_color=ft.colors.BLACK87)
-                ]
-            )
-        )
-        self.print_button = ft.IconButton(
-            icon=ft.icons.SAVE, tooltip="imprimer devis",
-            on_click=self.imprimer
+        self.fp = ft.FilePicker(on_result=self.imprimer_devis)
+        self.print_button = ft.ElevatedButton(
+            text="Imprimer",
+            height=50,
+            color="white",
+            bgcolor="red",
+            icon=ft.icons.PRINT_OUTLINED,
+            icon_color="white",
+            tooltip="imprimer devis",
+            on_click=lambda e: self.fp.save_file()
         )
         self.options_container = ft.Container(
             **standard_ct_style,
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                controls=[self.options, self.print_button]
+                controls=[self.print_button]
             )
         )
         # Stack ecran de creatiuon de devis________________________________________________________
@@ -687,663 +682,164 @@ class Devis(ft.UserControl):
         self.msg_error.update()
 
     # fonctions d'impression ______________________________________
-    def imprimer_personnel(self):
-        chemin = asksaveasfilename(title='save as', defaultextension="pdf")
-        fichier = os.path.abspath(chemin)
+
+    def imprimer_devis(self, e: ft.FilePickerResultEvent):
+
+        save_location = e.path
+        fichier = os.path.abspath(save_location)
         can = Canvas("{0}".format(fichier), pagesize=A4)
 
-        # dessin des entêtes
-        def draw_headers():
-            logo = "assets/logo 1.jpg"
-            signature = "assets/signature.png"
-            # dessin logo et dignature
-            can.drawImage(logo, 1.5 * cm, 26 * cm)
-            can.drawImage(signature, 12 * cm, 2 * cm)
-            # infos de l'entreprise
-            can.setFillColorRGB(0, 0, 0)
-            can.setFont("Helvetica-Bold", 14)
-            can.drawCentredString(4 * cm, 24.8 * cm, f"{ENTITE_NOM}")
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawCentredString(4 * cm, 24.3 * cm, f"RC: {ENTITE_RC}")
-            can.drawCentredString(4 * cm, 23.8 * cm, f"NUI: {ENTITE_NUI}")
-            can.setFont("Helvetica-Bold", 24)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawCentredString(15 * cm, 27.5 * cm, "Proforma")
-            can.setFont("Helvetica", 14)
-            can.drawCentredString(15 * cm, 26.8 * cm, f"N°: {self.search_devis.value}")
-            can.setFont("Helvetica", 12)
-            can.drawCentredString(15 * cm, 26.3 * cm, f"date: {ecrire_date(self.date.value)}")
-
-            # infos du client
-            infos_client = backend.infos_clients(self.client_id.value)
-            # cadre des infos du client
-            can.setStrokeColorRGB(0, 0, 0)
-            can.rect(10.5 * cm, 21.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
-            can.setFont("Helvetica-Bold", 12)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawString(11 * cm, 24.1 * cm, f"{self.client_name.value}")
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[3] is not None:
-                can.drawString(11 * cm, 23.4 * cm, f"Contact: {infos_client[3]}")
-
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[4] is not None:
-                can.drawString(11 * cm, 22.7 * cm, f"NUI: {infos_client[4]}")
-
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[5] is not None:
-                can.drawString(11 * cm, 22 * cm, f"RC: {infos_client[5]}")
-
-        draw_headers()
-
-        y = 21.5
-
-        # details factures
-        can.setStrokeColorRGB(0, 0, 0)
-        # Lignes horizontales
-        can.line(1 * cm, (y - 1) * cm, 20 * cm, (y - 1) * cm)
-        can.line(1 * cm, (y - 2) * cm, 20 * cm, (y - 2) * cm)
-        # lignes verticales
-        can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 2) * cm)
-        can.line(11 * cm, (y - 1) * cm, 11 * cm, (y - 2) * cm)
-        can.line(12.5 * cm, (y - 1) * cm, 12.5 * cm, (y - 2) * cm)
-        can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
-        can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
-        can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
-        # draw headers
-        can.setFont("Helvetica-Bold", 10)
-        can.drawCentredString(6 * cm, (y - 1.6) * cm, "Désignation")
-        can.drawCentredString(11.75 * cm, (y - 1.6) * cm, "Qté")
-        can.drawCentredString(13.25 * cm, (y - 1.6) * cm, "unité")
-        can.drawCentredString(15.5 * cm, (y - 1.6) * cm, "Prix unitaire")
-        can.drawCentredString(18.5 * cm, (y - 1.6) * cm, "Montant")
-
-        ref_list = []
-        total_devis = 0
-        l = self.table_devis.rows[:]  # liste de DataRow
-        for i in range(len(l)):
-            sous_liste = []
-            for j in range(len(l[i].cells)):
-                sous_liste.append(l[i].cells[j].content.value)
-            ref_list.append(sous_liste)
-
-        for row in ref_list:
-            total_devis += row[4]
-            can.setFillColorRGB(0, 0, 0)
-            can.setFont("Helvetica", 10)
-            can.drawCentredString(6 * cm, (y - 2.6) * cm, f"{row[1]}")
-            can.drawCentredString(11.75 * cm, (y - 2.6) * cm, f"{row[2]}")
-            can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
-            can.drawCentredString(15.5 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
-            can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
-            # lignes verticales
-            can.setStrokeColorRGB(0, 0, 0)
-            can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
-            can.line(11 * cm, (y - 2) * cm, 11 * cm, (y - 3) * cm)
-            can.line(12.5 * cm, (y - 2) * cm, 12.5 * cm, (y - 3) * cm)
-            can.line(14 * cm, (y - 2) * cm, 14 * cm, (y - 3) * cm)
-            can.line(17 * cm, (y - 2) * cm, 17 * cm, (y - 3) * cm)
-            can.line(20 * cm, (y - 2) * cm, 20 * cm, (y - 3) * cm)
-            # lignes horizontales
-            can.setStrokeColorRGB(0, 0, 0)
-            can.line(1 * cm, (y - 3) * cm, 20 * cm, (y - 3) * cm)
-            y -= 1
-
-        y = y - 1.5
-
-        can.setFillColorRGB(0, 0, 0)
-        can.setFont("Helvetica-Bold", 10)
-        can.drawCentredString(15.5 * cm, (y - 1) * cm, "Total:")
-        can.setFont("Helvetica", 11)
-        can.drawCentredString(18.5 * cm, (y - 1) * cm, f"{milSep(total_devis)}")
-
-        if int(self.remise.value) != 0:
-            can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(15.5 * cm, (y - 1.5) * cm, "Remise:")
-            can.drawCentredString(15.5 * cm, (y - 2) * cm, "Après remise:")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(18.5 * cm, (y - 1.5) * cm, f"{int(self.remise.value)}%")
-            can.drawCentredString(18.5 * cm, (y - 2) * cm, f"{milSep(int(self.montant.value))}")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(10.5 * cm, (y - 3) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
-            can.drawCentredString(10.5 * cm, (y - 3.5) * cm,
-                                  "Disponibilité: produits disponibles en stock sauf vente entretemps")
+        if self.search_devis.value is None:
+            self.bad_impression.open = True
+            self.bad_impression.update()
 
         else:
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(10.5 * cm, (y - 2) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
-            can.drawCentredString(10.5 * cm, (y - 2.5) * cm,
-                                  "Disponibilité: produits disponibles en stock sauf vente entretemps")
 
-        # pied de page
-        can.setFont("Helvetica", 8)
-        can.setFillColorRGB(0.25, 0.25, 0.25)
-        can.drawCentredString(10.5 * cm, 1.3 * cm, "FOMIDERC SARL")
-        can.drawCentredString(10.5 * cm, 0.9 * cm, f"{ENTITE_ADRESSE_1} {ENTITE_ADRESSE_2}")
-        can.drawCentredString(10.5 * cm, 0.5 * cm, f"contact: {ENTITE_TEL}, courriel: {ENTITE_MAIL}")
-        can.save()
+            # dessin des entêtes
+            def draw_headers():
+                entete = "assets/header.png"
+                signature = "assets/signature.png"
+                footer = "assets/footer.png"
+                # dessin logo et dignature
+                # can.drawImage(logo, 1.5 * cm, 26 * cm)
+                can.drawImage(entete, 0 * cm, 26.5 * cm)
+                can.drawImage(footer, 0 * cm, 0 * cm)
+                can.drawImage(signature, 12 * cm, 2 * cm)
+                # infos de l'entreprise
+                can.setFont("Helvetica-Bold", 24)
+                can.setFillColorRGB(0, 0, 0)
+                can.drawCentredString(5.5 * cm, 24.5 * cm, "PROFORMA")
+                can.setFont("Helvetica", 13)
+                can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {self.search_devis.value}")
+                can.setFont("Helvetica", 12)
+                can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {self.date.value}")
+                # infos du client
+                infos_client = backend.infos_clients(self.client_id.value)
+                # cadre des infos du client
+                can.setStrokeColorRGB(0, 0, 0)
+                can.rect(10.5 * cm, 22.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
+                can.setFont("Helvetica-Bold", 12)
+                can.setFillColorRGB(0, 0, 0)
+                can.drawString(11 * cm, 25.1 * cm, f"Client: {self.client_name.value}")
+                can.setFont("Helvetica", 11)
+                can.setFillColorRGB(0, 0, 0)
 
-    def imprimer_etat(self):
-        chemin = asksaveasfilename(title='save as', defaultextension="pdf")
-        fichier = os.path.abspath(chemin)
-        can = Canvas("{0}".format(fichier), pagesize=A4)
+                if infos_client[3] is not None:
+                    can.drawString(11 * cm, 24.4 * cm, f"Contact: {infos_client[3]}")
 
-        # dessin des entêtes
-        def draw_headers():
-            logo = "assets/logo 1.jpg"
-            signature = "assets/signature.png"
-            # dessin logo et dignature
-            can.drawImage(logo, 1.5 * cm, 26 * cm)
-            can.drawImage(signature, 12 * cm, 2 * cm)
-            # infos de l'entreprise
-            can.setFillColorRGB(0, 0, 0)
-            can.setFont("Helvetica-Bold", 14)
-            can.drawCentredString(4 * cm, 24.8 * cm, f"{ENTITE_NOM}")
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawCentredString(4 * cm, 24.3 * cm, f"RC: {ENTITE_RC}")
-            can.drawCentredString(4 * cm, 23.8 * cm, f"NUI: {ENTITE_NUI}")
-            can.setFont("Helvetica-Bold", 24)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawCentredString(15 * cm, 27.5 * cm, "Proforma")
-            can.setFont("Helvetica", 14)
-            can.drawCentredString(15 * cm, 26.8 * cm, f"N°: {self.search_devis.value}")
-            can.setFont("Helvetica", 12)
-            can.drawCentredString(15 * cm, 26.3 * cm, f"date: {ecrire_date(self.date.value)}")
-            # infos du client
-            infos_client = backend.infos_clients(int(self.client_id.value))
-            # cadre des infos du client
+                can.setFont("Helvetica", 11)
+                can.setFillColorRGB(0, 0, 0)
+
+                if infos_client[4] is not None:
+                    can.drawString(11 * cm, 23.7 * cm, f"NUI: {infos_client[4]}")
+
+                can.setFont("Helvetica", 11)
+                can.setFillColorRGB(0, 0, 0)
+
+                if infos_client[5] is not None:
+                    can.drawString(11 * cm, 23 * cm, f"RC: {infos_client[5]}")
+
+            draw_headers()
+
+            y = 22.5
+
+            # details factures
             can.setStrokeColorRGB(0, 0, 0)
-            can.rect(10.5 * cm, 21.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
-            can.setFont("Helvetica-Bold", 12)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawString(11 * cm, 24.1 * cm, f"{self.client_name.value}")
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[3] is not None:
-                can.drawString(11 * cm, 23.4 * cm, f"Contact: {infos_client[3]}")
-
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[4] is not None:
-                can.drawString(11 * cm, 22.7 * cm, f"NUI: {infos_client[4]}")
-
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[5] is not None:
-                can.drawString(11 * cm, 22 * cm, f"RC: {infos_client[5]}")
-
-        draw_headers()
-
-        y = 21.5
-
-        can.setStrokeColorRGB(0, 0, 0)
-        # Lignes horizontales
-        can.line(1 * cm, (y - 1) * cm, 20 * cm, (y - 1) * cm)
-        can.line(1 * cm, (y - 2) * cm, 20 * cm, (y - 2) * cm)
-        # lignes verticales
-        can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 2) * cm)
-        can.line(11 * cm, (y - 1) * cm, 11 * cm, (y - 2) * cm)
-        can.line(12.5 * cm, (y - 1) * cm, 12.5 * cm, (y - 2) * cm)
-        can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
-        can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
-        can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
-        # draw headers
-        can.setFont("Helvetica-Bold", 10)
-        can.drawCentredString(6 * cm, (y - 1.6) * cm, "Désignation")
-        can.drawCentredString(11.75 * cm, (y - 1.6) * cm, "Qté")
-        can.drawCentredString(13.25 * cm, (y - 1.6) * cm, "unité")
-        can.drawCentredString(15.5 * cm, (y - 1.6) * cm, "Prix unitaire")
-        can.drawCentredString(18.5 * cm, (y - 1.6) * cm, "Montant")
-
-        ref_list = []
-        total_devis = 0
-        l = self.table_devis.rows[:]
-        for i in range(len(l)):
-            sous_liste = []
-            for j in range(len(l[i].cells)):
-                sous_liste.append(l[i].cells[j].content.value)
-            ref_list.append(sous_liste)
-
-        for row in ref_list:
-            total_devis += row[4]
-            can.setFillColorRGB(0, 0, 0)
-            can.setFont("Helvetica", 10)
-            can.drawCentredString(6 * cm, (y - 2.6) * cm, f"{row[1]}")
-            can.drawCentredString(11.75 * cm, (y - 2.6) * cm, f"{row[2]}")
-            can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
-            can.drawCentredString(15.5 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
-            can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
+            # Lignes horizontales
+            can.line(1 * cm, (y - 1) * cm, 20 * cm, (y - 1) * cm)
+            can.line(1 * cm, (y - 2) * cm, 20 * cm, (y - 2) * cm)
             # lignes verticales
-            can.setStrokeColorRGB(0, 0, 0)
-            can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
-            can.line(11 * cm, (y - 2) * cm, 11 * cm, (y - 3) * cm)
-            can.line(12.5 * cm, (y - 2) * cm, 12.5 * cm, (y - 3) * cm)
-            can.line(14 * cm, (y - 2) * cm, 14 * cm, (y - 3) * cm)
-            can.line(17 * cm, (y - 2) * cm, 17 * cm, (y - 3) * cm)
-            can.line(20 * cm, (y - 2) * cm, 20 * cm, (y - 3) * cm)
-            # lignes horizontales
-            can.setStrokeColorRGB(0, 0, 0)
-            can.line(1 * cm, (y - 3) * cm, 20 * cm, (y - 3) * cm)
-            y -= 1
-
-        y = y - 1.5
-
-        can.setFillColorRGB(0, 0, 0)
-        can.setFont("Helvetica-Bold", 10)
-        can.drawCentredString(15.5 * cm, (y - 1) * cm, "Total:")
-        can.setFont("Helvetica", 11)
-        can.drawCentredString(18.5 * cm, (y - 1) * cm, f"{milSep(total_devis)}")
-
-        y = y - 1
-        pas = 0.5
-
-        if int(self.remise.value) != 0:
+            can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 2) * cm)
+            can.line(11 * cm, (y - 1) * cm, 11 * cm, (y - 2) * cm)
+            can.line(12.5 * cm, (y - 1) * cm, 12.5 * cm, (y - 2) * cm)
+            can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
+            can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
+            can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
+            # draw headers
             can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(15.5 * cm, (y - pas) * cm, "Remise:")
-            can.drawCentredString(15.5 * cm, (y - 2 * pas) * cm, "Après remise:")
-            can.drawCentredString(15.5 * cm, (y - 3 * pas) * cm, "IR:")
-            can.drawCentredString(15.5 * cm, (y - 4 * pas) * cm, "NAP:")
-            can.drawCentredString(15.5 * cm, (y - 5 * pas) * cm, "TVA:")
-            can.drawCentredString(15.5 * cm, (y - 6 * pas) * cm, "Total TTC:")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(18.5 * cm, (y - pas) * cm, f"{int(self.remise.value)}%")
-            can.drawCentredString(18.5 * cm, (y - 2 * pas) * cm, f"{milSep(int(self.montant.value))}")
+            can.drawCentredString(6 * cm, (y - 1.6) * cm, "Désignation")
+            can.drawCentredString(11.75 * cm, (y - 1.6) * cm, "Qté")
+            can.drawCentredString(13.25 * cm, (y - 1.6) * cm, "unité")
+            can.drawCentredString(15.5 * cm, (y - 1.6) * cm, "Prix unitaire")
+            can.drawCentredString(18.5 * cm, (y - 1.6) * cm, "Montant")
 
-            if int(self.montant.value) < 5000000:
-                mt_ir = int(self.montant.value) * 5.5 / 100
+            ref_list = []
+            total_devis = 0
+            l = self.table_devis.rows[:]  # liste de DataRow
+            for i in range(len(l)):
+                sous_liste = []
+                for j in range(len(l[i].cells)):
+                    sous_liste.append(l[i].cells[j].content.value)
+                ref_list.append(sous_liste)
+
+            for row in ref_list:
+                total_devis += row[4]
+                can.setFillColorRGB(0, 0, 0)
+                can.setFont("Helvetica", 10)
+                can.drawCentredString(6 * cm, (y - 2.6) * cm, f"{row[1]}")
+                can.drawCentredString(11.75 * cm, (y - 2.6) * cm, f"{row[2]}")
+                can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
+                can.drawCentredString(15.5 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
+                can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
+                # lignes verticales
+                can.setStrokeColorRGB(0, 0, 0)
+                can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
+                can.line(11 * cm, (y - 2) * cm, 11 * cm, (y - 3) * cm)
+                can.line(12.5 * cm, (y - 2) * cm, 12.5 * cm, (y - 3) * cm)
+                can.line(14 * cm, (y - 2) * cm, 14 * cm, (y - 3) * cm)
+                can.line(17 * cm, (y - 2) * cm, 17 * cm, (y - 3) * cm)
+                can.line(20 * cm, (y - 2) * cm, 20 * cm, (y - 3) * cm)
+                # lignes horizontales
+                can.setStrokeColorRGB(0, 0, 0)
+                can.line(1 * cm, (y - 3) * cm, 20 * cm, (y - 3) * cm)
+                y -= 1
+
+            y = y - 1.5
+
+            can.setFillColorRGB(0, 0, 0)
+            can.setFont("Helvetica-Bold", 10)
+            can.drawCentredString(15.5 * cm, (y - 1) * cm, "Total:")
+            can.setFont("Helvetica", 11)
+            can.drawCentredString(18.5 * cm, (y - 1) * cm, f"{milSep(total_devis)}")
+
+            if int(self.remise.value) != 0:
+                rem = str(self.remise.value)
+                mt_rem = total_devis * rem // 100
+                net = total_devis - mt_rem
+                ir = net * 5.5 // 100
+                nap = net - ir
+                can.setFont("Helvetica-Bold", 10)
+                can.drawCentredString(15.5 * cm, (y - 1.5) * cm, "Remise:")
+                can.drawCentredString(15.5 * cm, (y - 2) * cm, "net:")
+                can.drawCentredString(15.5 * cm, (y - 2.5) * cm, "IR:")
+                can.drawCentredString(15.5 * cm, (y - 3) * cm, "NAP:")
+
+                can.setFont("Helvetica", 11)
+                can.drawCentredString(18.5 * cm, (y - 1.5) * cm, f"{milSep(mt_rem)}")
+                can.drawCentredString(18.5 * cm, (y - 2) * cm, f"{milSep(net)}")
+                can.drawCentredString(15.5 * cm, (y - 2.5) * cm, f"{milSep(ir)}")
+                can.drawCentredString(15.5 * cm, (y - 3) * cm, f"{milSep(nap)}")
+                can.setFont("Helvetica", 11)
+                can.drawCentredString(10.5 * cm, (y - 4) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
+                can.drawCentredString(10.5 * cm, (y - 4.5) * cm,
+                                      "Disponibilité: produits disponibles en stock sauf vente entretemps")
+
             else:
-                mt_ir = int(self.montant.value) * 2.2 / 100
+                ir = total_devis * 5.5 // 100
+                nap = total_devis - ir
+                can.setFont("Helvetica-Bold", 10)
+                can.drawCentredString(15.5 * cm, (y - 1.5) * cm, "IR:")
+                can.drawCentredString(15.5 * cm, (y - 2) * cm, "NAP:")
 
-            can.drawCentredString(18.5 * cm, (y - 3 * pas) * cm, f"{milSep(int(mt_ir))}")
-            mt_nap = int(self.montant.value) - mt_ir
-            can.drawCentredString(18.5 * cm, (y - 4 * pas) * cm, f"{milSep(int(mt_nap))}")
-            mt_tva = int(self.montant.value) * 19.25 / 100
-            can.drawCentredString(18.5 * cm, (y - 5 * pas) * cm, f"{milSep(int(mt_tva))}")
-            mt_ttc = int(self.montant.value) + mt_tva
-            can.drawCentredString(18.5 * cm, (y - 6 * pas) * cm, f"{milSep(int(mt_ttc))}")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(10.5 * cm, (y - 8 * pas) * cm, f"arrêtée à la somme de: {ecrire_en_lettres(mt_ttc).lower()}")
-            can.drawCentredString(10.5 * cm, (y - 9 * pas) * cm,
-                                  "Disponibilité: produits disponibles en stock sauf vente entretemps")
+                can.setFont("Helvetica", 11)
+                can.drawCentredString(18.5 * cm, (y - 1.5) * cm, f"{milSep(ir)} ")
+                can.drawCentredString(18.5 * cm, (y - 2) * cm, f"{milSep(nap)}")
 
-        else:
-            can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(15.5 * cm, (y - pas) * cm, "IR:")
-            can.drawCentredString(15.5 * cm, (y - 2 * pas) * cm, "NAP:")
-            can.drawCentredString(15.5 * cm, (y - 3 * pas) * cm, "TVA:")
-            can.drawCentredString(15.5 * cm, (y - 4 * pas) * cm, "Total TTC:")
-            can.setFont("Helvetica", 11)
-
-            if int(self.montant.value) < 5000000:
-                mt_ir = int(self.montant.value) * 5.5 / 100
-            else:
-                mt_ir = int(self.montant.value) * 2.2 / 100
-
-            can.drawCentredString(18.5 * cm, (y - pas) * cm, f"{milSep(int(mt_ir))}")
-            mt_nap = int(self.montant.value) - mt_ir
-            can.drawCentredString(18.5 * cm, (y - 2 * pas) * cm, f"{milSep(int(mt_nap))}")
-            mt_tva = int(self.montant.value) * 19.25 / 100
-            can.drawCentredString(18.5 * cm, (y - 3 * pas) * cm, f"{milSep(int(mt_tva))}")
-            mt_ttc = int(self.montant.value) + mt_tva
-            can.drawCentredString(18.5 * cm, (y - 4 * pas) * cm, f"{milSep(int(mt_ttc))}")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(10.5 * cm, (y - 6 * pas) * cm, f"arrêtée à la somme de: {ecrire_en_lettres(mt_ttc).lower()}")
-            can.drawCentredString(10.5 * cm, (y - 7 * pas) * cm,
-                                  "Disponibilité: produits disponibles en stock sauf vente entretemps")
-
-        # pied de page
-        can.setFont("Helvetica", 8)
-        can.setFillColorRGB(0.25, 0.25, 0.25)
-        can.drawCentredString(10.5 * cm, 1.3 * cm, "FOMIDERC SARL")
-        can.drawCentredString(10.5 * cm, 0.9 * cm, f"{ENTITE_ADRESSE_1} {ENTITE_ADRESSE_2}")
-        can.drawCentredString(10.5 * cm, 0.5 * cm, f"contact: {ENTITE_TEL}, courriel: {ENTITE_MAIL}")
-        can.save()
-
-    def imprimer_seul_TVA(self):
-        chemin = asksaveasfilename(title='save as', defaultextension="pdf")
-        fichier = os.path.abspath(chemin)
-        can = Canvas("{0}".format(fichier), pagesize=A4)
-
-        # dessin des entêtes
-        def draw_headers():
-            logo = "assets/logo 1.jpg"
-            signature = "assets/signature.png"
-            # dessin logo et dignature
-            can.drawImage(logo, 1.5 * cm, 26 * cm)
-            can.drawImage(signature, 12 * cm, 2 * cm)
-            # infos de l'entreprise
-            can.setFillColorRGB(0, 0, 0)
-            can.setFont("Helvetica-Bold", 14)
-            can.drawCentredString(4 * cm, 24.8 * cm, f"{ENTITE_NOM}")
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawCentredString(4 * cm, 24.3 * cm, f"RC: {ENTITE_RC}")
-            can.drawCentredString(4 * cm, 23.8 * cm, f"NUI: {ENTITE_NUI}")
-            can.setFont("Helvetica-Bold", 24)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawCentredString(15 * cm, 27.5 * cm, "Proforma")
-            can.setFont("Helvetica", 14)
-            can.drawCentredString(15 * cm, 26.8 * cm, f"N°: {self.search_devis.value}")
-            can.setFont("Helvetica", 12)
-            can.drawCentredString(15 * cm, 26.3 * cm, f"date: {ecrire_date(self.date.value)}")
-            # infos du client
-            infos_client = backend.infos_clients(self.client_id.value)
-            # cadre des infos du client
-            can.setStrokeColorRGB(0, 0, 0)
-            can.rect(10.5 * cm, 21.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
-            can.setFont("Helvetica-Bold", 12)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawString(11 * cm, 24.1 * cm, f"{self.client_name.value}")
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[3] is not None:
-                can.drawString(11 * cm, 23.4 * cm, f"Contact: {infos_client[3]}")
-
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[4] is not None:
-                can.drawString(11 * cm, 22.7 * cm, f"NUI: {infos_client[4]}")
-
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[5] is not None:
-                can.drawString(11 * cm, 22 * cm, f"RC: {infos_client[5]}")
-
-        draw_headers()
-
-        y = 21.5
-
-        can.setStrokeColorRGB(0, 0, 0)
-        # Lignes horizontales
-        can.line(1 * cm, (y - 1) * cm, 20 * cm, (y - 1) * cm)
-        can.line(1 * cm, (y - 2) * cm, 20 * cm, (y - 2) * cm)
-        # lignes verticales
-        can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 2) * cm)
-        can.line(11 * cm, (y - 1) * cm, 11 * cm, (y - 2) * cm)
-        can.line(12.5 * cm, (y - 1) * cm, 12.5 * cm, (y - 2) * cm)
-        can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
-        can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
-        can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
-        # draw headers
-        can.setFont("Helvetica-Bold", 10)
-        can.drawCentredString(6 * cm, (y - 1.6) * cm, "Désignation")
-        can.drawCentredString(11.75 * cm, (y - 1.6) * cm, "Qté")
-        can.drawCentredString(13.25 * cm, (y - 1.6) * cm, "unité")
-        can.drawCentredString(15.5 * cm, (y - 1.6) * cm, "Prix unitaire")
-        can.drawCentredString(18.5 * cm, (y - 1.6) * cm, "Montant")
-
-        ref_list = []
-        total_devis = 0
-        l = self.table_devis.rows[:]  # liste de DataRow
-        for i in range(len(l)):
-            sous_liste = []
-            for j in range(len(l[i].cells)):
-                sous_liste.append(l[i].cells[j].content.value)
-            ref_list.append(sous_liste)
-
-        for row in ref_list:
-            total_devis += row[4]
-            can.setFillColorRGB(0, 0, 0)
-            can.setFont("Helvetica", 10)
-            can.drawCentredString(6 * cm, (y - 2.6) * cm, f"{row[1]}")
-            can.drawCentredString(11.75 * cm, (y - 2.6) * cm, f"{row[2]}")
-            can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
-            can.drawCentredString(15.5 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
-            can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
-            # lignes verticales
-            can.setStrokeColorRGB(0, 0, 0)
-            can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
-            can.line(11 * cm, (y - 2) * cm, 11 * cm, (y - 3) * cm)
-            can.line(12.5 * cm, (y - 2) * cm, 12.5 * cm, (y - 3) * cm)
-            can.line(14 * cm, (y - 2) * cm, 14 * cm, (y - 3) * cm)
-            can.line(17 * cm, (y - 2) * cm, 17 * cm, (y - 3) * cm)
-            can.line(20 * cm, (y - 2) * cm, 20 * cm, (y - 3) * cm)
-            # lignes horizontales
-            can.setStrokeColorRGB(0, 0, 0)
-            can.line(1 * cm, (y - 3) * cm, 20 * cm, (y - 3) * cm)
-            y -= 1
-
-        y = y - 1.5
-
-        can.setFillColorRGB(0, 0, 0)
-        can.setFont("Helvetica-Bold", 10)
-        can.drawCentredString(15.5 * cm, (y - 1) * cm, "Total:")
-        can.setFont("Helvetica", 11)
-        can.drawCentredString(18.5 * cm, (y - 1) * cm, f"{milSep(total_devis)}")
-
-        y = y - 1
-        pas = 0.5
-
-        if int(self.remise.value) != 0:
-            can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(15.5 * cm, (y - pas) * cm, "Remise:")
-            can.drawCentredString(15.5 * cm, (y - 2 * pas) * cm, "Montant après remise:")
-            can.drawCentredString(15.5 * cm, (y - 3 * pas) * cm, "TVA:")
-            can.drawCentredString(15.5 * cm, (y - 4 * pas) * cm, "Total TTC:")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(18.5 * cm, (y - pas) * cm, f"{int(self.remise.value)}%")
-            can.drawCentredString(18.5 * cm, (y - 2 * pas) * cm, f"{milSep(int(self.montant.value))}")
-            mt_tva = int(self.montant.value) * 19.25 / 100
-            can.drawCentredString(18.5 * cm, (y - 3 * pas) * cm, f"{milSep(int(mt_tva))}")
-            mt_ttc = int(self.montant.value) + mt_tva
-            can.drawCentredString(18.5 * cm, (y - 4 * pas) * cm, f"{milSep(int(mt_ttc))}")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(10.5 * cm, (y - 6 * pas) * cm, f"arrêtée à la somme de: {ecrire_en_lettres(mt_ttc).lower()}")
-            can.drawCentredString(10.5 * cm, (y - 7 * pas) * cm,
-                                  "Disponibilité: produits disponibles en stock sauf vente entretemps")
-
-        else:
-            can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(15.5 * cm, (y - pas) * cm, "TVA:")
-            can.drawCentredString(15.5 * cm, (y - 2 * pas) * cm, "Total TTC:")
-            can.setFont("Helvetica", 11)
-            mt_tva = int(self.montant.value) * 19.25 / 100
-            can.drawCentredString(18.5 * cm, (y - pas) * cm, f"{milSep(int(mt_tva))}")
-            mt_ttc = int(self.montant.value) + mt_tva
-            can.drawCentredString(18.5 * cm, (y - 2 * pas) * cm, f"{milSep(int(mt_ttc))}")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(10.5 * cm, (y - 4 * pas) * cm, f"arrêtée à la somme de: {ecrire_en_lettres(mt_ttc).lower()}")
-            can.drawCentredString(10.5 * cm, (y - 5 * pas) * cm,
-                                  "Disponibilité: produits disponibles en stock sauf vente entretemps")
-
-        # pied de page
-        can.setFont("Helvetica", 8)
-        can.setFillColorRGB(0.25, 0.25, 0.25)
-        can.drawCentredString(10.5 * cm, 1.3 * cm, "FOMIDERC SARL")
-        can.drawCentredString(10.5 * cm, 0.9 * cm, f"{ENTITE_ADRESSE_1} {ENTITE_ADRESSE_2}")
-        can.drawCentredString(10.5 * cm, 0.5 * cm, f"contact: {ENTITE_TEL}, courriel: {ENTITE_MAIL}")
-        can.save()
-
-    def imprimer_IR_sans_NAP(self):
-        chemin = asksaveasfilename(title='save as', defaultextension="pdf")
-        fichier = os.path.abspath(chemin)
-        can = Canvas("{0}".format(fichier), pagesize=A4)
-
-        # Dessin des entêtes
-        def draw_headers():
-            logo = "assets/logo 1.jpg"
-            signature = "assets/signature.png"
-            # dessin logo et dignature
-            can.drawImage(logo, 1.5 * cm, 26 * cm)
-            can.drawImage(signature, 12 * cm, 2 * cm)
-            # infos de l'entreprise
-            can.setFillColorRGB(0, 0, 0)
-            can.setFont("Helvetica-Bold", 14)
-            can.drawCentredString(4 * cm, 24.8 * cm, f"{ENTITE_NOM}")
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawCentredString(4 * cm, 24.3 * cm, f"RC: {ENTITE_RC}")
-            can.drawCentredString(4 * cm, 23.8 * cm, f"NUI: {ENTITE_NUI}")
-            can.setFont("Helvetica-Bold", 24)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawCentredString(15 * cm, 27.5 * cm, "Proforma")
-            can.setFont("Helvetica", 14)
-            can.drawCentredString(15 * cm, 26.8 * cm, f"N°: {self.search_devis.value}")
-            can.setFont("Helvetica", 12)
-            can.drawCentredString(15 * cm, 26.3 * cm, f"date: {ecrire_date(self.date.value)}")
-            # infos du client
-            infos_client = backend.infos_clients(self.client_id.value)
-            # cadre des infos du client
-            can.setStrokeColorRGB(0, 0, 0)
-            can.rect(10.5 * cm, 21.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
-            can.setFont("Helvetica-Bold", 12)
-            can.setFillColorRGB(0, 0, 0)
-            can.drawString(11 * cm, 24.1 * cm, f"{self.client_name.value}")
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[3] is not None:
-                can.drawString(11 * cm, 23.4 * cm, f"Contact: {infos_client[3]}")
-
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[4] is not None:
-                can.drawString(11 * cm, 22.7 * cm, f"NUI: {infos_client[4]}")
-
-            can.setFont("Helvetica", 11)
-            can.setFillColorRGB(0, 0, 0)
-
-            if infos_client[5] is not None:
-                can.drawString(11 * cm, 22 * cm, f"RC: {infos_client[5]}")
-
-        draw_headers()
-
-        y = 21.5
-
-        can.setStrokeColorRGB(0, 0, 0)
-        # Lignes horizontales
-        can.line(1 * cm, (y - 1) * cm, 20 * cm, (y - 1) * cm)
-        can.line(1 * cm, (y - 2) * cm, 20 * cm, (y - 2) * cm)
-        # lignes verticales
-        can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 2) * cm)
-        can.line(11 * cm, (y - 1) * cm, 11 * cm, (y - 2) * cm)
-        can.line(12.5 * cm, (y - 1) * cm, 12.5 * cm, (y - 2) * cm)
-        can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
-        can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
-        can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
-
-        # draw headers
-        can.setFont("Helvetica-Bold", 10)
-        can.drawCentredString(6 * cm, (y - 1.6) * cm, "Désignation")
-        can.drawCentredString(11.75 * cm, (y - 1.6) * cm, "Qté")
-        can.drawCentredString(13.25 * cm, (y - 1.6) * cm, "unité")
-        can.drawCentredString(15.5 * cm, (y - 1.6) * cm, "Prix unitaire")
-        can.drawCentredString(18.5 * cm, (y - 1.6) * cm, "Montant")
-
-        ref_list = []
-        total_devis = 0
-        l = self.table_devis.rows[:]  # liste de DataRow
-        for i in range(len(l)):
-            sous_liste = []
-            for j in range(len(l[i].cells)):
-                sous_liste.append(l[i].cells[j].content.value)
-            ref_list.append(sous_liste)
-
-        for row in ref_list:
-            total_devis += row[4]
-            can.setFillColorRGB(0, 0, 0)
-            can.setFont("Helvetica", 10)
-            can.drawCentredString(6 * cm, (y - 2.6) * cm, f"{row[1]}")
-            can.drawCentredString(11.75 * cm, (y - 2.6) * cm, f"{row[2]}")
-            can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
-            can.drawCentredString(15.5 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
-            can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
-            # lignes verticales
-            can.setStrokeColorRGB(0, 0, 0)
-            can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
-            can.line(11 * cm, (y - 2) * cm, 11 * cm, (y - 3) * cm)
-            can.line(12.5 * cm, (y - 2) * cm, 12.5 * cm, (y - 3) * cm)
-            can.line(14 * cm, (y - 2) * cm, 14 * cm, (y - 3) * cm)
-            can.line(17 * cm, (y - 2) * cm, 17 * cm, (y - 3) * cm)
-            can.line(20 * cm, (y - 2) * cm, 20 * cm, (y - 3) * cm)
-            # lignes horizontales
-            can.setStrokeColorRGB(0, 0, 0)
-            can.line(1 * cm, (y - 3) * cm, 20 * cm, (y - 3) * cm)
-
-            y -= 1
-
-        y = y - 1.5
-
-        can.setFillColorRGB(0, 0, 0)
-        can.setFont("Helvetica-Bold", 10)
-        can.drawCentredString(15.5 * cm, (y - 1) * cm, "Total:")
-        can.setFont("Helvetica", 11)
-        can.drawCentredString(18.5 * cm, (y - 1) * cm, f"{milSep(total_devis)}")
-
-        y = y - 1
-        pas = 0.5
-
-        if int(self.remise.value) != 0:
-            can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(15.5 * cm, (y - pas) * cm, "Remise:")
-            can.drawCentredString(15.5 * cm, (y - 2 * pas) * cm, "Après remise:")
-            can.drawCentredString(15.5 * cm, (y - 3 * pas) * cm, "IR:")
-            can.drawCentredString(15.5 * cm, (y - 4 * pas) * cm, "TVA:")
-            can.drawCentredString(15.5 * cm, (y - 5 * pas) * cm, "Total TTC:")
-
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(18.5 * cm, (y - pas) * cm, f"{int(self.remise.value)}%")
-            can.drawCentredString(18.5 * cm, (y - 2 * pas) * cm, f"{milSep(int(self.montant.value))}")
-
-            if int(self.montant.value) < 5000000:
-                mt_ir = int(self.montant.value) * 5.5 / 100
-            else:
-                mt_ir = int(self.montant.value) * 2.2 / 100
-            can.drawCentredString(18.5 * cm, (y - 3 * pas) * cm, f"{milSep(int(mt_ir))}")
-
-            mt_tva = int(self.montant.value) * 19.25 / 100
-            can.drawCentredString(18.5 * cm, (y - 4 * pas) * cm, f"{milSep(int(mt_tva))}")
-            mt_ttc = int(self.montant.value) + mt_tva
-            can.drawCentredString(18.5 * cm, (y - 5 * pas) * cm, f"{milSep(int(mt_ttc))}")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(10.5 * cm, (y - 7 * pas) * cm, f"arrêtée à la somme de: {ecrire_en_lettres(mt_ttc).lower()}")
-            can.drawCentredString(10.5 * cm, (y - 8 * pas) * cm,
-                                  "Disponibilité: produits disponibles en stock sauf vente entretemps")
-
-        else:
-            can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(15.5 * cm, (y - pas) * cm, "IR:")
-            can.drawCentredString(15.5 * cm, (y - 2 * pas) * cm, "TVA:")
-            can.drawCentredString(15.5 * cm, (y - 3 * pas) * cm, "Total TTC:")
-            can.setFont("Helvetica", 11)
-
-            if int(self.montant.value) < 5000000:
-                mt_ir = int(self.montant.value) * 5.5 / 100
-            else:
-                mt_ir = int(self.montant.value) * 2.2 / 100
-
-            can.drawCentredString(18.5 * cm, (y - pas) * cm, f"{milSep(int(mt_ir))}")
-            mt_tva = int(self.montant.value) * 19.25 / 100
-            can.drawCentredString(18.5 * cm, (y - 2 * pas) * cm, f"{milSep(int(mt_tva))}")
-            mt_ttc = int(self.montant.value) + mt_tva
-            can.drawCentredString(18.5 * cm, (y - 3 * pas) * cm, f"{milSep(int(mt_ttc))}")
-            can.setFont("Helvetica", 11)
-            can.drawCentredString(10.5 * cm, (y - 5 * pas) * cm, f"arrêtée à la somme de: {ecrire_en_lettres(mt_ttc).lower()}")
-            can.drawCentredString(10.5 * cm, (y - 6 * pas) * cm,
-                                  "Disponibilité: produits disponibles en stock sauf vente entretemps")
-
-        # pied de page
-        can.setFont("Helvetica", 8)
-        can.setFillColorRGB(0.25, 0.25, 0.25)
-        can.drawCentredString(10.5 * cm, 1.3 * cm, "FOMIDERC SARL")
-        can.drawCentredString(10.5 * cm, 0.9 * cm, f"{ENTITE_ADRESSE_1} {ENTITE_ADRESSE_2}")
-        can.drawCentredString(10.5 * cm, 0.5 * cm, f"contact: {ENTITE_TEL}, courriel: {ENTITE_MAIL}")
-        can.save()
+                can.setFont("Helvetica", 11)
+                can.drawCentredString(10.5 * cm, (y - 3) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
+                can.drawCentredString(10.5 * cm, (y - 3.5) * cm,
+                                      "Disponibilité: produits disponibles en stock sauf vente entretemps")
+            can.save()
 
     def close_good_impression(self, e):
         self.good_impression.open = False
@@ -1352,31 +848,6 @@ class Devis(ft.UserControl):
     def close_bad_impression(self, e):
         self.bad_impression.open = False
         self.bad_impression.update()
-
-    def imprimer(self, e):
-        if self.options.value == "etat":
-            self.imprimer_etat()
-            self.good_impression.open = True
-            self.good_impression.update()
-
-        elif self.options.value == "personnel":
-            self.imprimer_personnel()
-            self.good_impression.open = True
-            self.good_impression.update()
-
-        elif self.options.value == "tva":
-            self.imprimer_seul_TVA()
-            self.good_impression.open = True
-            self.good_impression.update()
-
-        elif self.options.value == "ir":
-            self.imprimer_IR_sans_NAP()
-            self.good_impression.open = True
-            self.good_impression.update()
-
-        else:
-            self.bad_impression.open = True
-            self.bad_impression.update()
 
     # facturation du devis _____________________________________________________
     def facturer_devis(self, e):
@@ -1456,70 +927,68 @@ class Devis(ft.UserControl):
         self.error_stock.open = False
         self.error_stock.update()
 
-    def imprimer_bordereau(self, e):
+    def imprimer_bordereau(self, e: ft.FilePickerResultEvent):
         if not backend.verif_bordereau(self.search_devis.value):
             self.error_bordereau.open = True
             self.error_bordereau.update()
 
         else:
-            chemin = asksaveasfilename(title='save as', defaultextension="pdf")
-            fichier = os.path.abspath(chemin)
+            save_location = e.path
+            fichier = os.path.abspath(save_location)
             can = Canvas("{0}".format(fichier), pagesize=A4)
 
             # dessin des entêtes
             def draw_headers():
-                logo = "assets/logo 1.jpg"
+                entete = "assets/header.png"
                 signature = "assets/signature.png"
-
-                # dessin logo et signature
-                can.drawImage(logo, 1.5 * cm, 26 * cm)
+                footer = "assets/footer.png"
+                # dessin logo et dignature
+                # can.drawImage(logo, 1.5 * cm, 26 * cm)
+                can.drawImage(entete, 0 * cm, 26.5 * cm)
+                can.drawImage(footer, 0 * cm, 0 * cm)
                 can.drawImage(signature, 12 * cm, 2 * cm)
-
                 # infos de l'entreprise
+                can.setFont("Helvetica-Bold", 20)
                 can.setFillColorRGB(0, 0, 0)
-                can.setFont("Helvetica-Bold", 14)
-                can.drawCentredString(4 * cm, 24.8 * cm, f"{ENTITE_NOM}")
-                can.setFont("Helvetica", 11)
-                can.setFillColorRGB(0, 0, 0)
-                can.drawCentredString(4 * cm, 24.3 * cm, f"RC: {ENTITE_RC}")
-                can.drawCentredString(4 * cm, 23.8 * cm, f"NUI: {ENTITE_NUI}")
-                can.setFont("Helvetica-Bold", 24)
-                can.setFillColorRGB(0, 0, 0)
-                can.drawCentredString(15 * cm, 27.5 * cm, "Bordereau de livraison")
-                can.setFont("Helvetica", 12)
+                can.drawCentredString(5.5 * cm, 24.5 * cm, "BORDEREAU DE LIVRAISON")
+                can.setFont("Helvetica", 13)
                 num_bex = backend.search_bordereau(self.search_devis.value)[1]
                 bc = backend.search_bordereau(self.search_devis.value)[3]
-                can.drawCentredString(15 * cm, 26.8 * cm, f"N°: {num_bex}")
+                can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {num_bex}")
                 can.setFont("Helvetica", 12)
-                can.drawCentredString(15 * cm, 26.3 * cm, f"date: {ecrire_date(self.date.value)}")
-                # infos du client
+                can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {self.date.value}")
+
+                # infos client"
                 infos_client = backend.infos_clients(self.client_id.value)
                 # cadre des infos du client
                 can.setStrokeColorRGB(0, 0, 0)
-                can.rect(10.5 * cm, 21.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
+                can.rect(10.5 * cm, 22.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
                 can.setFont("Helvetica-Bold", 12)
                 can.setFillColorRGB(0, 0, 0)
-                can.drawString(11 * cm, 24.1 * cm, f"{self.client_name.value}")
-                can.setFont("Helvetica", 12)
+                can.drawString(11 * cm, 25.1 * cm, f"Client: {self.client_name.value}")
+                can.setFont("Helvetica", 11)
                 can.setFillColorRGB(0, 0, 0)
-                can.drawString(11 * cm, 23.4 * cm, f"BC client: {bc}")
+
+                if infos_client[3] is not None:
+                    can.drawString(11 * cm, 24.4 * cm, f"Contact: {infos_client[3]}")
 
                 can.setFont("Helvetica", 11)
                 can.setFillColorRGB(0, 0, 0)
 
                 if infos_client[4] is not None:
-                    can.drawString(11 * cm, 22.7 * cm, f"NUI: {infos_client[4]}")
+                    can.drawString(11 * cm, 23.7 * cm, f"NUI: {infos_client[4]}")
 
                 can.setFont("Helvetica", 11)
                 can.setFillColorRGB(0, 0, 0)
 
                 if infos_client[5] is not None:
-                    can.drawString(11 * cm, 22 * cm, f"RC: {infos_client[5]}")
+                    can.drawString(11 * cm, 23 * cm, f"RC: {infos_client[5]}")
 
             draw_headers()
 
-            y = 21.5
+            y = 22.5
 
+            # details factures
             can.setStrokeColorRGB(0, 0, 0)
             # Lignes horizontales
             can.line(1 * cm, (y - 1) * cm, 20 * cm, (y - 1) * cm)
@@ -1531,7 +1000,6 @@ class Devis(ft.UserControl):
             can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
             can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
             can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
-
             # draw headers
             can.setFont("Helvetica-Bold", 10)
             can.drawCentredString(6 * cm, (y - 1.6) * cm, "Désignation")
@@ -1558,6 +1026,7 @@ class Devis(ft.UserControl):
                 can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
                 can.drawCentredString(15.5 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
                 can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
+                # lignes verticales
                 can.setStrokeColorRGB(0, 0, 0)
                 can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
                 can.line(11 * cm, (y - 2) * cm, 11 * cm, (y - 3) * cm)
@@ -1589,14 +1058,6 @@ class Devis(ft.UserControl):
             can.line(13.5 * cm, (y - 3.2) * cm, 17 * cm, (y - 3.2) * cm)
             can.setFont("Helvetica-Oblique", 9)
             can.drawCentredString(15.25 * cm, (y - 3.7) * cm, "(Nom, date, signature)")
-
-            # pied de page
-            can.setFont("Helvetica", 8)
-            can.setFillColorRGB(0.25, 0.25, 0.25)
-            can.drawCentredString(10.5 * cm, 1.3 * cm, "FOMIDERC SARL")
-            can.drawCentredString(10.5 * cm, 0.9 * cm, f"{ENTITE_ADRESSE_1} {ENTITE_ADRESSE_2}")
-            can.drawCentredString(10.5 * cm, 0.5 * cm, f"contact: {ENTITE_TEL}, courriel: {ENTITE_MAIL}")
-
             can.save()
             self.confirm_bordereau.open = True
             self.confirm_bordereau.update()
@@ -1992,7 +1453,7 @@ class Devis(ft.UserControl):
                                     alignment=ft.alignment.center,
                                     spacing=10,
                                     controls=[
-                                        ft.Container(**title_container_style, content=self.title_page),
+                                        ft.Container(**title_container_style, content=ft.Row([self.title_page, ft.Image(src="logo.jpg", height=70, width=70)], alignment="spaceBetween")),
                                         self.filter_container,
                                         self.infos_container,
                                         self.devis_container,
@@ -2017,7 +1478,8 @@ class Devis(ft.UserControl):
                     self.new_ligne_window,
                     self.error_box,
                     self.confirmation_box,
-                    self.modal_box
+                    self.modal_box,
+                    self.fp
                 ]
             )
         )

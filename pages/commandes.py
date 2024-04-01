@@ -1,8 +1,13 @@
 import backend
 from styles.commandeStyleSheet import *
-from others.useful_fonctions import milSep, ecrire_en_lettres
+from others.useful_fonctions import *
 from datetime import date, datetime
 import pandas
+import os
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.lib.units import cm
+from reportlab.lib.pagesizes import A4
+
 
 class Commandes(ft.UserControl):
     def __init__(self, page):
@@ -63,12 +68,21 @@ class Commandes(ft.UserControl):
         self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer commande", on_click=self.open_new_commande_window)
         self.receive = ft.IconButton(icon=ft.icons.INVENTORY_OUTLINED, tooltip="Modifier commande", on_click=self.open_receipt_window)
 
+        self.save_commandes = ft.FilePicker(on_result=self.extract_commandes)
+        self.save_details_com = ft.FilePicker(on_result=self.extract_details_commandes)
+        self.cmd_bt = ft.IconButton(ft.icons.UPLOAD_FILE_OUTLINED, tooltip="extraction excel des commandes",
+                                    on_click=lambda e: self.save_commandes.save_file())
+        self.details_cmd_bt = ft.IconButton(ft.icons.FILE_OPEN, tooltip="extraction excel des details de commandes",
+                                            on_click=lambda e: self.save_details_com.save_file())
+        self.fp = ft.FilePicker(on_result=self.imprimer_bon_commande)
+        self.print_bc = ft.IconButton(ft.icons.PRINT_OUTLINED, on_click=lambda e: self.fp.save_file())
+
         self.filter_container = ft.Container(
             **filter_container_style,
             content=ft.Row(
                 [
                     ft.Row([self.filtre, self.search_commande, self.client_id]),
-                    ft.Row([self.actions, self.add, self.receive])
+                    ft.Row([self.actions, self.add, self.receive, self.save_commandes, self.save_details_com, self.cmd_bt, self.details_cmd_bt, self.print_bc])
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             )
@@ -99,18 +113,6 @@ class Commandes(ft.UserControl):
                 height=360,
                 scroll=ft.ScrollMode.ADAPTIVE,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER)
-        )
-        self.save_commandes = ft.FilePicker(on_result=self.extract_commandes)
-        self.save_details_com = ft.FilePicker(on_result=self.extract_details_commandes)
-        self.ct_extractions= ft.Container(
-            **menu_container_style,
-            content=ft.Row(
-                [
-                    ft.Text("Extractions excel", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb")),
-                    ft.IconButton(ft.icons.UPLOAD_FILE_OUTLINED, tooltip="extraction excel des commandes", on_click=lambda e: self.save_commandes.save_file()),
-                    ft.IconButton(ft.icons.FILE_OPEN, tooltip="extraction excel des details de commandes", on_click=lambda e: self.save_details_com.save_file()),
-                ]
-            )
         )
         # Stack ecran de creatiuon de commande________________________________________________________
         self.n_com = ft.TextField(**infos_style, disabled=True)
@@ -269,6 +271,116 @@ class Commandes(ft.UserControl):
             "devis", "factures"
         ]
         self.page.go(f"/{pages[e.control.selected_index]}")
+
+    def imprimer_bon_commande(self, e: ft.FilePickerResultEvent):
+        savelocation = e.path
+        fichier = os.path.abspath(savelocation)
+        can = Canvas("{0}".format(fichier), pagesize=A4)
+
+        # dessin des entêtes
+        def draw_headers():
+            entete = "assets/header.png"
+            signature = "assets/signature.png"
+            footer = "assets/footer.png"
+            # dessin logo et dignature
+            # can.drawImage(logo, 1.5 * cm, 26 * cm)
+            can.drawImage(entete, 0*cm, 26.5*cm)
+            can.drawImage(footer, 0*cm, 0*cm)
+            can.drawImage(signature, 12 * cm, 2 * cm)
+            # infos de l'entreprise
+            can.setFont("Helvetica-Bold", 24)
+            can.setFillColorRGB(0, 0, 0)
+            can.drawCentredString(5.5 * cm, 24.5 * cm, "BON DE COMMANDE")
+            can.setFont("Helvetica", 13)
+            can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {self.search_commande.value}")
+            can.setFont("Helvetica", 12)
+            can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {self.date.value}")
+            # infos du client
+            infos_fournisseur = backend.infos_fournisseur_by_name(self.fournisseur.value)
+            # cadre des infos du client
+            can.setStrokeColorRGB(0, 0, 0)
+            can.rect(10.5 * cm, 22.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
+            can.setFont("Helvetica-Bold", 12)
+            can.setFillColorRGB(0, 0, 0)
+            can.drawString(11 * cm, 25.1 * cm, f"{self.fournisseur.value}")
+            can.setFont("Helvetica", 11)
+            can.setFillColorRGB(0, 0, 0)
+
+            if infos_fournisseur[3] is not None:
+                can.drawString(11 * cm, 24.4 * cm, f"Contact: {infos_fournisseur[3]}")
+
+            can.setFont("Helvetica", 11)
+            can.setFillColorRGB(0, 0, 0)
+
+            if infos_fournisseur[4] is not None:
+                can.drawString(11 * cm, 23.7 * cm, f"NUI: {infos_fournisseur[4]}")
+
+            can.setFont("Helvetica", 11)
+            can.setFillColorRGB(0, 0, 0)
+
+            if infos_fournisseur[5] is not None:
+                can.drawString(11 * cm, 23 * cm, f"RC: {infos_fournisseur[5]}")
+
+        draw_headers()
+
+        y = 22.5
+
+        # details factures
+        can.setStrokeColorRGB(0, 0, 0)
+        # Lignes horizontales
+        can.line(1 * cm, (y - 1) * cm, 20 * cm, (y - 1) * cm)
+        can.line(1 * cm, (y - 2) * cm, 20 * cm, (y - 2) * cm)
+        # lignes verticales
+        can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 2) * cm)
+        can.line(11 * cm, (y - 1) * cm, 11 * cm, (y - 2) * cm)
+        can.line(12.5 * cm, (y - 1) * cm, 12.5 * cm, (y - 2) * cm)
+        can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
+        can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
+        can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
+        # draw headers
+        can.setFont("Helvetica-Bold", 10)
+        can.drawCentredString(6 * cm, (y - 1.6) * cm, "Désignation")
+        can.drawCentredString(11.75 * cm, (y - 1.6) * cm, "Qté")
+        can.drawCentredString(13.25 * cm, (y - 1.6) * cm, "unité")
+        can.drawCentredString(15.5 * cm, (y - 1.6) * cm, "Prix unitaire")
+        can.drawCentredString(18.5 * cm, (y - 1.6) * cm, "Montant")
+
+        ref_list = backend.show_commande_details(self.search_commande.value)
+        total_devis = 0
+
+        for row in ref_list:
+            total_devis += row[4]
+            can.setFillColorRGB(0, 0, 0)
+            can.setFont("Helvetica", 10)
+            can.drawCentredString(6 * cm, (y - 2.6) * cm, f"{backend.search_designation(row[2])[0]}")
+            can.drawCentredString(11.75 * cm, (y - 2.6) * cm, f"{row[3]}")
+            can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[2])}")
+            can.drawCentredString(15.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
+            can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4] * row[3])}")
+            # lignes verticales
+            can.setStrokeColorRGB(0, 0, 0)
+            can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
+            can.line(11 * cm, (y - 2) * cm, 11 * cm, (y - 3) * cm)
+            can.line(12.5 * cm, (y - 2) * cm, 12.5 * cm, (y - 3) * cm)
+            can.line(14 * cm, (y - 2) * cm, 14 * cm, (y - 3) * cm)
+            can.line(17 * cm, (y - 2) * cm, 17 * cm, (y - 3) * cm)
+            can.line(20 * cm, (y - 2) * cm, 20 * cm, (y - 3) * cm)
+            # lignes horizontales
+            can.setStrokeColorRGB(0, 0, 0)
+            can.line(1 * cm, (y - 3) * cm, 20 * cm, (y - 3) * cm)
+            y -= 1
+
+        y = y - 1.5
+
+        can.setFillColorRGB(0, 0, 0)
+        can.setFont("Helvetica-Bold", 10)
+        can.drawCentredString(15.5 * cm, (y - 1) * cm, "Total:")
+        can.setFont("Helvetica", 11)
+        can.drawCentredString(18.5 * cm, (y - 1) * cm, f"{milSep(total_devis)}")
+
+        # can.setFont("Helvetica", 11)
+        # can.drawCentredString(10.5 * cm, (y - 2) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
+        can.save()
 
     @staticmethod
     def extract_commandes(e: ft.FilePickerResultEvent):
@@ -587,11 +699,10 @@ class Commandes(ft.UserControl):
                                     alignment=ft.alignment.center,
                                     spacing=10,
                                     controls=[
-                                        ft.Container(**menu_container_style, content=self.title_page),
+                                        ft.Container(**title_container_style, content=ft.Row([self.title_page, ft.Image(src="logo.jpg", height=70, width=70)], alignment="spaceBetween")),
                                         self.filter_container,
                                         self.infos_container,
                                         self.commande_container,
-                                        self.ct_extractions
                                     ]
                                 )
                             ]
@@ -604,7 +715,8 @@ class Commandes(ft.UserControl):
                     self.receipt_window,
                     self.date_picker,
                     self.save_commandes,
-                    self.save_details_com
+                    self.save_details_com,
+                    self.fp
                 ]
             )
         )

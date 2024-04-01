@@ -104,3 +104,8 @@ new_mail_style: dict = dict(
     text_size=14,
     content_padding=12
 )
+title_container_style: dict = dict(
+    border=ft.border.all(1, color="#ebebeb"),
+    padding=ft.padding.only(left=10, right=10, top=5, bottom=5),
+    border_radius=8,
+)

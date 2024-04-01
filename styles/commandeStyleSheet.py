@@ -161,3 +161,8 @@ drop_style: dict = dict(
     text_style=ft.TextStyle(size=12, font_family="Poppins Medium", color=ft.colors.BLACK87),
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium", color=ft.colors.BLACK87),
 )
+title_container_style: dict = dict(
+    border=ft.border.all(1, color="#ebebeb"),
+    padding=ft.padding.only(left=10, right=10, top=5, bottom=5),
+    border_radius=8,
+)

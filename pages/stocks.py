@@ -222,7 +222,7 @@ class Stocks(ft.UserControl):
                         spacing=20),
                     ft.Row(
                         [ft.Text("Actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb")),
-                         self.add, self.edit, self.achat, self.delete]
+                         self.add, self.edit, self.achat, self.delete, self.stock_bt, self.save_me, self.histo_bt, self.save_histo]
                     )
                 ]
             )
@@ -664,7 +664,7 @@ class Stocks(ft.UserControl):
                         alignment=ft.alignment.center,
                         spacing=10,
                         controls=[
-                            ft.Container(**title_container_style, content=self.title_page),
+                            ft.Container(**title_container_style, content=ft.Row([self.title_page, ft.Image(src="logo.jpg", height=70, width=70)], alignment="spaceBetween")),
                             self.filter_container,
                             ft.Row(
                                 [
@@ -673,15 +673,6 @@ class Stocks(ft.UserControl):
                                 ],
                                 vertical_alignment=ft.CrossAxisAlignment.START
                             ),
-                            ft.Row(
-                                [
-                                    ft.Text(
-                                        "Extractions",
-                                        style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb")
-                                    ),
-                                    self.stock_bt, self.save_me, self.histo_bt, self.save_histo
-                                ], alignment="starf"),
-
                             self.new_article_window,
                             self.edit_article_window,
                             self.achat_window,

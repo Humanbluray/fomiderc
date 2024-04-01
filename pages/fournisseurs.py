@@ -1,5 +1,3 @@
-import fontTools.misc.psCharStrings
-
 import backend
 from styles.fournisseursStyleSheet import *
 
@@ -455,7 +453,7 @@ class Fournisseurs(ft.UserControl):
                         alignment=ft.alignment.center,
                         spacing=10,
                         controls=[
-                            ft.Container(**menu_container_style, content=self.title_page),
+                            ft.Container(**title_container_style, content=ft.Row([self.title_page, ft.Image(src="logo.jpg", height=70, width=70)], alignment="spaceBetween")),
                             self.filter_container,
                             ft.Row(
                                 [
