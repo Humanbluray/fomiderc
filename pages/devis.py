@@ -57,7 +57,8 @@ class Devis(ft.UserControl):
             on_change=self.switch_page
         )
         self.title_page = ft.Text("DEVIS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
-        # filtres container ____________________________________________________________________
+
+        # filtres conteneur ____________________________________________________________________
         self.filtre = ft.Text("Filtre", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
         self.search_devis = ft.Dropdown(**filter_name_style, on_change=self.on_change_devis)
         self.client_id = ft.Text(visible=False)
@@ -108,7 +109,7 @@ class Devis(ft.UserControl):
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         )
         # impressions options _____________________________________________________________________
-        self.fp = ft.FilePicker(on_result=self.imprimer_devis)
+        self.fp2 = ft.FilePicker(on_result=self.imprimer_devis)
         self.print_button = ft.ElevatedButton(
             text="Imprimer",
             height=50,
@@ -117,13 +118,13 @@ class Devis(ft.UserControl):
             icon=ft.icons.PRINT_OUTLINED,
             icon_color="white",
             tooltip="imprimer devis",
-            on_click=lambda e: self.fp.save_file()
+            on_click=lambda e: self.fp2.save_file()
         )
         self.options_container = ft.Container(
             **standard_ct_style,
             content=ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                controls=[self.print_button]
+                controls=[self.print_button, self.fp2]
             )
         )
         # Stack ecran de creatiuon de devis________________________________________________________
@@ -446,7 +447,7 @@ class Devis(ft.UserControl):
                 )
             )
         )
-        # fonctions à loader sans evenements ____________________________________________________________
+        # fonctions à charger sans evenements ____________________________________________________________
         self.load_devis_list()
         self.load_clients_list()
         self.load_ref_list()
@@ -564,12 +565,14 @@ class Devis(ft.UserControl):
             )
 
     def add_remise(self, e):
-        self.n_remise.value = str(int(self.n_remise.value) + 5)
+        self.n_remise.value = str(int(self.n_remise.value) + 1)
         self.n_remise.update()
 
     def remove_remise(self, e):
-        self.n_remise.value = str(int(self.n_remise.value) - 5)
-        self.n_remise.update()
+        remise = int(self.n_remise.value)
+        if remise > 0:
+            self.n_remise.value = str(remise - 1)
+            self.n_remise.update()
 
     def on_change_ref(self, e):
         self.designation.value = backend.search_designation(self.reference.value)[0]
@@ -928,7 +931,7 @@ class Devis(ft.UserControl):
         self.error_stock.update()
 
     def imprimer_bordereau(self, e: ft.FilePickerResultEvent):
-        if not backend.verif_bordereau(self.search_devis.value):
+        if self.statut.value.lower() == "non facturé":
             self.error_bordereau.open = True
             self.error_bordereau.update()
 
@@ -948,15 +951,17 @@ class Devis(ft.UserControl):
                 can.drawImage(footer, 0 * cm, 0 * cm)
                 can.drawImage(signature, 12 * cm, 2 * cm)
                 # infos de l'entreprise
-                can.setFont("Helvetica-Bold", 20)
+                can.setFont("Helvetica-Bold", 16)
                 can.setFillColorRGB(0, 0, 0)
                 can.drawCentredString(5.5 * cm, 24.5 * cm, "BORDEREAU DE LIVRAISON")
-                can.setFont("Helvetica", 13)
-                num_bex = backend.search_bordereau(self.search_devis.value)[1]
-                bc = backend.search_bordereau(self.search_devis.value)[3]
-                can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {num_bex}")
                 can.setFont("Helvetica", 12)
+                num_bex = backend.search_bordereau(self.search_devis.value)[1]
+                can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {num_bex}")
+                can.setFont("Helvetica", 11)
                 can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {self.date.value}")
+                bc_client = backend.find_bc_by_devis(self.search_devis.value)
+                can.setFont("Helvetica", 10)
+                can.drawCentredString(5.5 * cm, 22.8 * cm, f"BC: {bc_client}")
 
                 # infos client"
                 infos_client = backend.infos_clients(self.client_id.value)
@@ -1315,7 +1320,7 @@ class Devis(ft.UserControl):
 
     def edit_remise_up(self, e):
         remise = int(self.m_remise.value)
-        remise += 5
+        remise += 1
         self.m_remise.value = remise
         self.m_remise.update()
 
@@ -1335,9 +1340,10 @@ class Devis(ft.UserControl):
 
     def edit_remise_down(self, e):
         remise = int(self.m_remise.value)
-        remise -= 5
-        self.m_remise.value = remise
-        self.m_remise.update()
+        if remise > 0:
+            remise -= 1
+            self.m_remise.value = remise
+            self.m_remise.update()
 
     def finish_edit_devis(self, e):
         montant = int(self.m_total.value)
@@ -1479,7 +1485,6 @@ class Devis(ft.UserControl):
                     self.error_box,
                     self.confirmation_box,
                     self.modal_box,
-                    self.fp
                 ]
             )
         )

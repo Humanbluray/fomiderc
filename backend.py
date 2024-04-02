@@ -970,10 +970,10 @@ def verif_bordereau(devis):
     conn = sql.connect(my_base)
     cur = conn.cursor()
     cur.execute("""SELECT numero FROM bordereau WHERE devis =?""", (devis,))
-    res = cur.fetchall()
+    res = cur.fetchone()
     conn.commit()
     conn.close()
-    return res
+    return res[0]
 
 
 # table historique
@@ -1363,13 +1363,22 @@ def reglements_par_facture(facture_num):
     return res
 
 
+def find_bc_by_devis(devis):
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT bc_client FROM factures WHERE devis = ?""", (devis, ))
+    res = cur.fetchone()
+    conn.commit()
+    conn.close()
+    return res[0]
+
+
 def func():
     conn = sql.connect(my_base)
     cur = conn.cursor()
     cur.execute("""""")
     conn.commit()
     conn.close()
-
 
 
 

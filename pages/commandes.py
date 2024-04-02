@@ -288,7 +288,7 @@ class Commandes(ft.UserControl):
             can.drawImage(footer, 0*cm, 0*cm)
             can.drawImage(signature, 12 * cm, 2 * cm)
             # infos de l'entreprise
-            can.setFont("Helvetica-Bold", 24)
+            can.setFont("Helvetica-Bold", 16)
             can.setFillColorRGB(0, 0, 0)
             can.drawCentredString(5.5 * cm, 24.5 * cm, "BON DE COMMANDE")
             can.setFont("Helvetica", 13)
@@ -302,7 +302,7 @@ class Commandes(ft.UserControl):
             can.rect(10.5 * cm, 22.6 * cm, 9.5 * cm, 3 * cm, fill=0, stroke=1)
             can.setFont("Helvetica-Bold", 12)
             can.setFillColorRGB(0, 0, 0)
-            can.drawString(11 * cm, 25.1 * cm, f"{self.fournisseur.value}")
+            can.drawString(11 * cm, 25.1 * cm, f"fournisseur: {self.fournisseur.value}")
             can.setFont("Helvetica", 11)
             can.setFillColorRGB(0, 0, 0)
 
