@@ -30,7 +30,7 @@ def ecrire_date(date):
 
     annee = date[0: 4]
     mois = date[5: 7]
-    jour = date[8:]
+    jour = date[8:10]
 
     m = find_mois(mois)
 
@@ -474,3 +474,4 @@ ENTITE_NUI = "M021812677041N"
 ENTITE_BANQUE = "AFRILAND FIRST BANK"
 ENTITE_IBAN = "CM21 10005 - 00022 - 08174701001 - 58"
 ENTITE_SWIFT = "CCEICMCX"
+

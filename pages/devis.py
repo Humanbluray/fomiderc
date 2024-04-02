@@ -136,6 +136,11 @@ class Devis(ft.UserControl):
         self.n_remise = ft.TextField(**new_remise_style, value="0")
         self.up = ft.IconButton(ft.icons.ADD_CIRCLE_OUTLINE, icon_size=24, on_click=self.add_remise)
         self.down = ft.IconButton(ft.icons.REMOVE_CIRCLE_OUTLINE, icon_size=24, on_click=self.remove_remise)
+        self.delai = ft.TextField(**nb_style, label="délai livraison")
+        self.ptliv = ft.TextField(**nb_style, label="point de livraison")
+        self.paydelay = ft.TextField(**paydelay_style, label="paiement", input_filter=ft.NumbersOnlyInputFilter())
+        self.validite = ft.TextField(**paydelay_style, label="validite", input_filter=ft.NumbersOnlyInputFilter())
+        self.notabene = ft.TextField(**nb_style, label="NB")
         self.ct_first = ft.Container(
             **standard_ct_style,
             content=ft.Column(
@@ -188,7 +193,7 @@ class Devis(ft.UserControl):
         self.table_new_devis = ft.DataTable(**table_new_devis_style)
         self.new_devis_window = ft.Card(
             elevation=30, expand=True,
-            top=5, left=300,
+            top=2, left=300,
             scale=ft.transform.Scale(scale=0),
             animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
             content=ft.Container(
@@ -196,7 +201,7 @@ class Devis(ft.UserControl):
                 border_radius=8,
                 opacity=1,
                 expand=True,
-                height=700,
+                height=800,
                 padding=ft.padding.all(20),
                 content=ft.Column(
                     controls=[
@@ -211,12 +216,19 @@ class Devis(ft.UserControl):
                         ft.Container(
                             **standard_ct_style,
                             content=ft.Column(
-                                [self.table_new_devis],
+                                [
+                                    self.table_new_devis,
+                                    # ft.Row([self.notabene, self.delai]),
+                                    #
+
+                                 ],
                                 expand=True,
-                                height=200, width=600,
+                                height=150, width=600,
                                 scroll=ft.ScrollMode.ADAPTIVE
                             )
                         ),
+                        ft.Row([self.notabene, self.delai]),
+                        ft.Row([self.ptliv, self.paydelay, self.validite]),
                         ft.Row(
                             [
                                 ft.ElevatedButton(
@@ -255,6 +267,7 @@ class Devis(ft.UserControl):
         )
         # fenetre de facturation de devis __________________________________________________________________________
         self.bc_client = ft.TextField(**bc_tf_style, label="bc client")
+        self.ov = ft.TextField(**bc_tf_style, label="OV(CIMENCAM)")
         self.confirmation_facturation = ft.Text("devis facturé", visible=False, style=ft.TextStyle(size=16, font_family="Poppins Regular", color="red"))
         self.facturer_window = ft.AlertDialog(
             title=ft.Text("facturer devis"),
@@ -262,6 +275,7 @@ class Devis(ft.UserControl):
                 [
                     ft.Text("Entrez le numéro de BC du client", style=ft.TextStyle(size=12, font_family="Poppins Regular")),
                     self.bc_client,
+                    self.ov,
                     self.confirmation_facturation
                 ],
                 height=200
@@ -606,7 +620,7 @@ class Devis(ft.UserControl):
 
         # recuperer la liste des lignes dans un tableau
         grande_liste = []
-        l = self.table_new_devis.rows[:] # liste de DataRow
+        l = self.table_new_devis.rows[:]  # liste de DataRow
         for i in range(len(l)):
             sous_liste = []
             for j in range(len(l[i].cells)):
@@ -650,8 +664,8 @@ class Devis(ft.UserControl):
             mt_remise = int(self.n_remise.value)
             montant = int(self.total.value)
             cli_id = int(self.n_cli_id.value)
-            backend.add_devis(self.n_dev.value, date.today(), cli_id, montant,
-                              self.object.value, mt_remise, self.total_lettres.value)
+            backend.add_devis(self.n_dev.value, date.today(), cli_id, montant, self.object.value, mt_remise,
+                              self.total_lettres.value, self.notabene.value, self.delai.value, self.ptliv.value, self.validite.value, self.paydelay.value)
 
             # add devis details
             for data in grande_liste:
@@ -715,7 +729,7 @@ class Devis(ft.UserControl):
                 can.setFont("Helvetica", 13)
                 can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {self.search_devis.value}")
                 can.setFont("Helvetica", 12)
-                can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {self.date.value}")
+                can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {ecrire_date(self.date.value)}")
                 # infos du client
                 infos_client = backend.infos_clients(self.client_id.value)
                 # cadre des infos du client
@@ -807,10 +821,10 @@ class Devis(ft.UserControl):
 
             if int(self.remise.value) != 0:
                 rem = str(self.remise.value)
-                mt_rem = total_devis * rem // 100
-                net = total_devis - mt_rem
-                ir = net * 5.5 // 100
-                nap = net - ir
+                mt_rem = int(total_devis * rem // 100)
+                net = int(total_devis - mt_rem)
+                ir = int(net * 5.5 // 100)
+                nap = int(net - ir)
                 can.setFont("Helvetica-Bold", 10)
                 can.drawCentredString(15.5 * cm, (y - 1.5) * cm, "Remise:")
                 can.drawCentredString(15.5 * cm, (y - 2) * cm, "net:")
@@ -822,14 +836,33 @@ class Devis(ft.UserControl):
                 can.drawCentredString(18.5 * cm, (y - 2) * cm, f"{milSep(net)}")
                 can.drawCentredString(15.5 * cm, (y - 2.5) * cm, f"{milSep(ir)}")
                 can.drawCentredString(15.5 * cm, (y - 3) * cm, f"{milSep(nap)}")
-                can.setFont("Helvetica", 11)
-                can.drawCentredString(10.5 * cm, (y - 4) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
-                can.drawCentredString(10.5 * cm, (y - 4.5) * cm,
-                                      "Disponibilité: produits disponibles en stock sauf vente entretemps")
+                can.setFont("Helvetica-Bold", 11)
+                can.drawString(1 * cm, (y - 4) * cm, f"Montant total: {ecrire_en_lettres(nap)}")
+                infos = backend.show_info_devis(self.search_devis.value)
+
+                if infos[7] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 4.5) * cm, f"NB: {infos[7]}")
+
+                if infos[8] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 5) * cm, f"Délai de livraison: {infos[8]}")
+
+                if infos[9] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 5.5) * cm, f"Point de llivraison: {infos[9]}")
+
+                if infos[11] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 6) * cm, f"Paiement: {infos[11]} jours après dépôt de facture")
+
+                if infos[7] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 6.5) * cm, f"NB: validité de l'offre: {infos[7]} mois")
 
             else:
-                ir = total_devis * 5.5 // 100
-                nap = total_devis - ir
+                ir = int(total_devis * 5.5 // 100)
+                nap = int(total_devis - ir)
                 can.setFont("Helvetica-Bold", 10)
                 can.drawCentredString(15.5 * cm, (y - 1.5) * cm, "IR:")
                 can.drawCentredString(15.5 * cm, (y - 2) * cm, "NAP:")
@@ -838,10 +871,30 @@ class Devis(ft.UserControl):
                 can.drawCentredString(18.5 * cm, (y - 1.5) * cm, f"{milSep(ir)} ")
                 can.drawCentredString(18.5 * cm, (y - 2) * cm, f"{milSep(nap)}")
 
-                can.setFont("Helvetica", 11)
-                can.drawCentredString(10.5 * cm, (y - 3) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
-                can.drawCentredString(10.5 * cm, (y - 3.5) * cm,
-                                      "Disponibilité: produits disponibles en stock sauf vente entretemps")
+                can.setFont("Helvetica-Bold", 11)
+                can.drawString(1 * cm, (y - 3) * cm, f"Montant total: {ecrire_en_lettres(nap)}")
+
+                infos = backend.show_info_devis(self.search_devis.value)
+
+                if infos[7] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 4) * cm, f"NB: {infos[7]}")
+
+                if infos[8] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 4.5) * cm, f"Délai de livraison: {infos[8]}")
+
+                if infos[9] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 5) * cm, f"Point de llivraison: {infos[9]}")
+
+                if infos[11] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 5.5) * cm, f"Paiement: {infos[11]} jours après dépôt de facture")
+
+                if infos[7] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 6) * cm, f"NB: validité de l'offre: {infos[7]} mois")
             can.save()
 
     def close_good_impression(self, e):
@@ -888,7 +941,7 @@ class Devis(ft.UserControl):
         # table facture
         backend.add_facture(
             numero_facture, info_facture[0], info_facture[3], info_facture[2], info_facture[4], info_facture[5],
-            self.search_devis.value, self.bc_client.value)
+            self.search_devis.value, self.bc_client.value, self.ov.value)
 
         # Table details facture
         for row in details_factures:
@@ -958,7 +1011,7 @@ class Devis(ft.UserControl):
                 num_bex = backend.search_bordereau(self.search_devis.value)[1]
                 can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {num_bex}")
                 can.setFont("Helvetica", 11)
-                can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {self.date.value}")
+                can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {ecrire_date(self.date.value)}")
                 bc_client = backend.find_bc_by_devis(self.search_devis.value)
                 can.setFont("Helvetica", 10)
                 can.drawCentredString(5.5 * cm, 22.8 * cm, f"BC: {bc_client}")
@@ -1395,6 +1448,7 @@ class Devis(ft.UserControl):
                 )
             )
         self.table_devis.update()
+        self.load_devis_list()
 
     def close_error_box(self, e):
         self.error_box.open = False
@@ -1459,7 +1513,7 @@ class Devis(ft.UserControl):
                                     alignment=ft.alignment.center,
                                     spacing=10,
                                     controls=[
-                                        ft.Container(**title_container_style, content=ft.Row([self.title_page, ft.Image(src="logo.jpg", height=70, width=70)], alignment="spaceBetween")),
+                                        ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
                                         self.filter_container,
                                         self.infos_container,
                                         self.devis_container,

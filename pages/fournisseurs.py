@@ -453,7 +453,7 @@ class Fournisseurs(ft.UserControl):
                         alignment=ft.alignment.center,
                         spacing=10,
                         controls=[
-                            ft.Container(**title_container_style, content=ft.Row([self.title_page, ft.Image(src="logo.jpg", height=70, width=70)], alignment="spaceBetween")),
+                            ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
                             self.filter_container,
                             ft.Row(
                                 [

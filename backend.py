@@ -20,7 +20,12 @@ def connexion_base():
                     objet           TEXT,
                     remise          INTEGER,
                     montant_lettres TEXT,
-                    statut          TEXT)""")
+                    statut          TEXT,
+                    note_bene       TEXT,
+                    delai           TEXT,
+                    point_liv       TEXT,
+                    validite        TEXT,
+                    paiement        TEXT)""")
 
     cur.execute("""CREATE TABLE IF NOT EXISTS devis_details (
                     id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +63,8 @@ def connexion_base():
                     remise          INTEGER,
                     montant_lettres TEXT,
                     devis           TEXT,
-                    bc_client       TEXT)""")
+                    bc_client       TEXT,
+                    ov              TEXT)""")
 
     cur.execute("""CREATE TABLE IF NOT EXISTS facture_details (
                     id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -158,16 +164,13 @@ def connexion_base():
 
 
 # fonctions de la table devis et devis_details ___________________________________________________________
-def add_devis(numero, date, client, montant, objet, remise, montant_lettres):
-    """Cete fonction génère un nouveau devis
-        numero, date, client, montant, objet, remise, montant_lettres sont les paramètres de base"""
-
+def add_devis(numero, date, client, montant, objet, remise, montant_lettres, notabene, delai, point_liv, validite, paiement):
     statut = "Non facturé"
     conn = sql.connect(my_base)
     cur = conn.cursor()
     cur.execute("""INSERT INTO devis values 
-                    (?,?,?,?,?,?,?,?,?)""",
-                (cur.lastrowid, numero, date, client, montant, objet, remise, montant_lettres, statut))
+                    (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (cur.lastrowid, numero, date, client, montant, objet, remise, montant_lettres, statut, notabene, delai, point_liv, validite, paiement))
     conn.commit()
     conn.close()
 
@@ -279,7 +282,9 @@ def add_devis_details(numero, reference, qte, prix):
 def show_info_devis(numero):
     conn = sql.connect(my_base)
     cur = conn.cursor()
-    cur.execute(""" SELECT client, date, objet, montant, remise, montant_lettres, statut FROM devis WHERE numero = ? """,
+    cur.execute(""" SELECT client, date, objet, montant, remise, montant_lettres, statut,
+                    note_bene, delai, point_liv, validite, paiement
+                    FROM devis WHERE numero = ? """,
                 (numero,))
     resultat = cur.fetchone()
     conn.commit()
@@ -489,13 +494,13 @@ def infos_clients_par_id(id_client):
 
 
 # table factures _____________________________________________________________________
-def add_facture(numero, client, montant, objet, remise, montant_lettres, devis, bc_client):
+def add_facture(numero, client, montant, objet, remise, montant_lettres, devis, bc_client, ov):
     global today
     conn = sql.connect(my_base)
     cur = conn.cursor()
     cur.execute("""INSERT INTO factures values 
-                    (?,?,?,?,?,?,?,?,?,?)""",
-                (cur.lastrowid, numero, today, client, montant, objet, remise, montant_lettres, devis, bc_client))
+                    (?,?,?,?,?,?,?,?,?,?,?)""",
+                (cur.lastrowid, numero, today, client, montant, objet, remise, montant_lettres, devis, bc_client, ov))
     conn.commit()
     conn.close()
 
@@ -561,7 +566,7 @@ def show_info_factures(numero):
     conn = sql.connect(my_base)
     cur = conn.cursor()
     cur.execute(
-        """ SELECT client, date, objet, montant, remise, montant_lettres, bc_client, devis FROM factures WHERE numero = ? """,
+        """ SELECT client, date, objet, montant, remise, montant_lettres, bc_client, devis, ov FROM factures WHERE numero = ? """,
         (numero,))
     resultat = cur.fetchone()
     conn.commit()

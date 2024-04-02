@@ -294,7 +294,7 @@ class Commandes(ft.UserControl):
             can.setFont("Helvetica", 13)
             can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {self.search_commande.value}")
             can.setFont("Helvetica", 12)
-            can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {self.date.value}")
+            can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {ecrire_date(self.date.value)}")
             # infos du client
             infos_fournisseur = backend.infos_fournisseur_by_name(self.fournisseur.value)
             # cadre des infos du client
@@ -605,7 +605,7 @@ class Commandes(ft.UserControl):
             # update status command
             backend.update_commande_statut("clôturée", self.m_com.value)
 
-            self.check_deliv_number.value = "Bon de récption créé"
+            self.check_deliv_number.value = "Bon de réception créé"
             self.check_deliv_number.visible = True
             self.check_deliv_number.update()
 
@@ -699,7 +699,7 @@ class Commandes(ft.UserControl):
                                     alignment=ft.alignment.center,
                                     spacing=10,
                                     controls=[
-                                        ft.Container(**title_container_style, content=ft.Row([self.title_page, ft.Image(src="logo.jpg", height=70, width=70)], alignment="spaceBetween")),
+                                        ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
                                         self.filter_container,
                                         self.infos_container,
                                         self.commande_container,

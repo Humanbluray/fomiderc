@@ -371,11 +371,19 @@ class Factures(ft.UserControl):
                 # infos de l'entreprise
                 can.setFont("Helvetica-Bold", 24)
                 can.setFillColorRGB(0, 0, 0)
-                can.drawCentredString(5.5 * cm, 24.5 * cm, "FACTURE")
+                can.drawCentredString(5.5 * cm, 25 * cm, "FACTURE")
                 can.setFont("Helvetica", 13)
-                can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {self.search_facture.value}")
+                can.drawCentredString(5.5 * cm, 24.3 * cm, f"N°: {self.search_facture.value}")
                 can.setFont("Helvetica", 12)
-                can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {self.date.value}")
+                can.drawCentredString(5.5 * cm, 23.8 * cm, f"date: {ecrire_date(self.date.value)}")
+                bc = backend.show_info_factures(self.search_facture.value)[6]
+                ov = backend.show_info_factures(self.search_facture.value)[8]
+                can.setFont("Helvetica", 12)
+                can.drawCentredString(5.5 * cm, 23.3 * cm, f"BC: {bc}")
+                if ov is not None or ov != "":
+                    can.setFont("Helvetica", 12)
+                    can.drawCentredString(5.5 * cm, 22.3 * cm, f"OV: {ov}")
+
                 # infos du client
                 infos_client = backend.infos_clients(self.client_id.value)
                 # cadre des infos du client
@@ -483,8 +491,9 @@ class Factures(ft.UserControl):
                 can.drawCentredString(15.5 * cm, (y - 2.5) * cm, f"{milSep(ir)}")
                 can.drawCentredString(15.5 * cm, (y - 3) * cm, f"{milSep(nap)}")
 
-                can.drawCentredString(10.5 * cm, (y - 4) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
-                can.setFont("Helvetica", 10)
+                can.setFont("Helvetica-Bold", 11)
+                can.drawString(1 * cm, (y - 4) * cm, f"Montant total: {ecrire_en_lettres(nap)}")
+                can.setFont("Helvetica", 11)
                 can.drawString(1 * cm, (y - 5) * cm, f"par virement à: {ENTITE_BANQUE}")
                 can.drawString(1 * cm, (y - 5.5) * cm, f"IBAN: {ENTITE_IBAN}")
                 can.drawString(1 * cm, (y - 6) * cm, f"Code swift: {ENTITE_SWIFT}")
@@ -500,9 +509,9 @@ class Factures(ft.UserControl):
                 can.drawCentredString(18.5 * cm, (y - 1.5) * cm, f"{milSep(ir)} ")
                 can.drawCentredString(18.5 * cm, (y - 2) * cm, f"{milSep(nap)}")
 
+                can.setFont("Helvetica-Bold", 11)
+                can.drawString(1 * cm, (y - 3) * cm, f"Montant total: {ecrire_en_lettres(nap)}")
                 can.setFont("Helvetica", 11)
-                can.drawCentredString(10.5 * cm, (y - 3) * cm, f"arrêtée à la somme de: {self.lettres.value.lower()}")
-                can.setFont("Helvetica", 10)
                 can.drawString(1 * cm, (y - 4) * cm, f"par virement à: {ENTITE_BANQUE}")
                 can.drawString(1 * cm, (y - 4.5) * cm, f"IBAN: {ENTITE_IBAN}")
                 can.drawString(1 * cm, (y - 5) * cm, f"Code swift: {ENTITE_SWIFT}")
@@ -544,7 +553,7 @@ class Factures(ft.UserControl):
                                     alignment=ft.alignment.center,
                                     spacing=10,
                                     controls=[
-                                        ft.Container(**title_container_style, content=ft.Row([self.title_page, ft.Image(src="logo.jpg", height=70, width=70)], alignment="spaceBetween")),
+                                        ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
                                         self.filter_container,
                                         self.infos_container,
                                         ft.Row([self.facture_container, self.table_paiments_container]),

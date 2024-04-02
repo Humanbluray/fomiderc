@@ -4,7 +4,7 @@ from vues import view_handler
 
 def main(page: ft.Page):
     page.window_width = 1330
-    page.window_height = 800
+    page.window_height = 830
 
     def route_change(route):
         page.views.clear()

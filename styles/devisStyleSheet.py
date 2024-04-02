@@ -218,3 +218,27 @@ table_edit_devis_style: dict = dict(
     ],
     rows=[]
 )
+paydelay_style: dict = dict(
+    width=100,
+    multiline=True,
+    height=50,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    border_radius=6,
+    text_size=14,
+    content_padding=12
+)
+nb_style: dict = dict(
+    width=300,
+    multiline=True,
+    height=50,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    border_radius=6,
+    text_size=14,
+    content_padding=12
+)
