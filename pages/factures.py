@@ -382,7 +382,7 @@ class Factures(ft.UserControl):
                 can.drawCentredString(5.5 * cm, 23.3 * cm, f"BC: {bc}")
                 if ov is not None or ov != "":
                     can.setFont("Helvetica", 12)
-                    can.drawCentredString(5.5 * cm, 22.3 * cm, f"OV: {ov}")
+                    can.drawCentredString(5.5 * cm, 22.8 * cm, f"OV: {ov}")
 
                 # infos du client
                 infos_client = backend.infos_clients(self.client_id.value)

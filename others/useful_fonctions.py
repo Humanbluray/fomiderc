@@ -438,7 +438,7 @@ def ecrire_en_lettres(nombre: int):
                 return milliards + " " + millions
 
     if len(carac) > 12:
-        print("le nombre est trop long. entrez un nombre de moins de 13 chiffres")
+        pass
 
     else:
         if 0 <= nombre < 10:
