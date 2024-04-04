@@ -61,11 +61,52 @@ class Clients(ft.UserControl):
         self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer client", on_click=self.open_new_cli_window)
         self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier client", on_click=self.open_edit_cli_window)
 
+        # fenetre de recherche de clients ___________________________________________________________________________
+        self.look_table = ft.DataTable(columns=[ft.DataColumn(ft.Text("nom du client", size=12, font_family="Poppins ExtraBold"))], rows=[])
+        self.filtre_clients = ft.TextField(
+                                border="underline", width=350, content_padding=12, cursor_height=24,
+                                text_style=ft.TextStyle(size=14, font_family="Poppins Medium"),
+                                hint_text="rechercher ici...", hint_style=ft.TextStyle(size=12, font_family="Poppins Medium"),
+                                on_change=self.on_change_look_clients
+                            )
+        self.choix = ft.Text(visible=False)
+        self.look_clients = ft.Card(
+            elevation=30, expand=True,
+            top=5, left=300,
+            height=700, width=600,
+            scale=ft.transform.Scale(scale=0),
+            animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
+            content=ft.Container(
+                padding=10,
+                bgcolor="white",
+                content=ft.Column(
+                    expand=True, height=500,
+                    controls=[
+                        ft.Container(
+                            **filter_container_style,
+                            content=ft.Row([self.filtre_clients, self.choix])
+                        ),
+                        ft.Column([self.look_table], scroll=ft.ScrollMode.ADAPTIVE, height=400),
+                        ft.Container(
+                            **filter_container_style,
+                            content=ft.Row(
+                                [
+                                    ft.ElevatedButton(text="choisir", bgcolor="red", color="white", on_click=self.select_client_choice, height=50),
+                                    ft.ElevatedButton(text="quitter", bgcolor="red", color="white", on_click=self.close_look_clients_window, height=50)
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
+
+        )
+
         self.filter_container = ft.Container(
             **filter_container_style,
             content=ft.Row(
                 [
-                    ft.Row([self.filtre, self.search_client_name, self.client_id]),
+                    ft.Row([self.filtre, self.search_client_name, self.client_id, ft.IconButton(ft.icons.SEARCH, on_click=self.afficher_look_clients_windows)]),
                     ft.Row([self.actions, self.add, self.edit])
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
@@ -185,6 +226,7 @@ class Clients(ft.UserControl):
             ]
         )
         self.load_clients_list()
+        self.load_look_clients_table()
 
     # functions _______________________________________________________________________________________________________________________________
     def switch_page(self, e):
@@ -199,6 +241,63 @@ class Clients(ft.UserControl):
             self.search_client_name.options.append(
                 ft.dropdown.Option(name)
             )
+
+    def afficher_look_clients_windows(self, e):
+        self.look_clients.scale = 1
+        self.look_clients.update()
+
+    def close_look_clients_window(self, e):
+        self.look_clients.scale = 0
+        self.look_clients.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
+        self.look_clients.update()
+
+    def load_look_clients_table(self):
+        for row in self.look_table.rows[:]:
+            self.look_table.rows.remove(row)
+
+        datas = backend.all_clients()
+        for data in datas:
+            self.look_table.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(
+                            ft.Text(f"{data}", size=12, font_family="Poppins Medium")
+                        )
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
+                )
+            )
+
+    def on_change_look_clients(self, e):
+        for row in self.look_table.rows[:]:
+            self.look_table.rows.remove(row)
+
+        datas = []
+        for data in backend.all_clients():
+            dico = {"client": data}
+            datas.append(dico)
+
+        myfiler = list(filter(lambda x: self.filtre_clients.value.lower() in x['client'].lower(), datas))
+
+        for row in myfiler:
+            self.look_table.rows.append(
+                ft.DataRow(cells=[
+                    ft.DataCell(ft.Text(f"{row['client']}", size=12, font_family="Poppins Medium"))
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
+                )
+            )
+        self.look_table.update()
+
+    def on_select_change_filtre(self, e):
+        self.choix.value = e
+
+    def select_client_choice(self, e):
+        self.search_client_name.value = self.choix.value
+        self.look_clients.scale = 0
+        self.look_clients.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
+        self.look_clients.update()
+        self.search_client_name.update()
 
     def change_client(self, e):
         self.client_id.value = backend.id_client_by_name(self.search_client_name.value)
@@ -415,30 +514,38 @@ class Clients(ft.UserControl):
             expand=True,
             height=768,
             padding=ft.padding.only(top=10, bottom=10, left=20, right=20),
-            content=ft.Row(
-                expand=True,
-                height=768,
+            content=ft.Stack(
                 controls=[
-                    self.rail,
-                    ft.VerticalDivider(width=20, color="#ededed"),
-                    ft.Column(
+                    ft.Row(
                         expand=True,
                         height=768,
-                        alignment=ft.alignment.center,
-                        spacing=10,
                         controls=[
-                            ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
-                            self.filter_container,
+                            self.rail,
+                            ft.VerticalDivider(width=20, color="#ededed"),
                             ft.Column(
+                                expand=True,
+                                height=768,
+                                alignment=ft.alignment.center,
+                                spacing=10,
                                 controls=[
-                                    ft.Row([self.table_factures_container, self.news_container], vertical_alignment=ft.CrossAxisAlignment.START),
-                                    self.info_detfac,
-                                    ft.Row([self.table_details_factures_container, self.table_paiments_container])
+                                    ft.Container(**title_container_style,
+                                                 content=ft.Row([self.title_page], alignment="spaceBetween")),
+                                    self.filter_container,
+                                    ft.Column(
+                                        controls=[
+                                            ft.Row([self.table_factures_container, self.news_container],
+                                                   vertical_alignment=ft.CrossAxisAlignment.START),
+                                            self.info_detfac,
+                                            ft.Row(
+                                                [self.table_details_factures_container, self.table_paiments_container])
+                                        ]
+                                    ),
+                                    self.new_cli_window, self.edit_cli_window
                                 ]
-                            ),
-                            self.new_cli_window, self.edit_cli_window
+                            )
                         ]
-                    )
+                    ),
+                    self.look_clients
                 ]
             )
         )
