@@ -14,8 +14,7 @@ class Stocks(ft.UserControl):
             selected_index=0,
             label_type=ft.NavigationRailLabelType.ALL,
             min_width=100,
-            # min_extended_width=400,
-            leading=ft.Text("MENU", style=ft.TextStyle(size=20, font_family="Poppins Bold", decoration=ft.TextDecoration.UNDERLINE)),
+            leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             destinations=[
                 ft.NavigationRailDestination(
@@ -190,9 +189,9 @@ class Stocks(ft.UserControl):
                     icon=ft.icons.ADD_CARD_OUTLINED,
                     text="Valider", icon_color="white",
                     color="white", bgcolor="red",
-                    height=45,
+                    height=50,
                     on_click=self.add_achat),
-                ft.FilledTonalButton(text="fermer", on_click=self.close_achat_window)
+                ft.FilledTonalButton(text="fermer", on_click=self.close_achat_window, height=50)
             ]
         )
 
@@ -502,7 +501,7 @@ class Stocks(ft.UserControl):
             self.table_stocks.update()
 
     def load_refs(self):
-        for article in backend.all_references_stock():
+        for article in backend.all_references():
             self.a_ref.options.append(
                 ft.dropdown.Option(article)
             )
@@ -569,23 +568,31 @@ class Stocks(ft.UserControl):
         self.dialog_box.update()
 
     def delete_reference(self, e):
-        historic = backend.all_historique_by_ref(self.m_ref.value)
-        if historic is None or historic == []:
-            backend.delete_ref(self.m_ref.value)
-            self.title_text.value = "confirmation"
-            self.content_text.value = "Reference  supprimée"
-            self.dialog_box.open = True
-            self.title_text.update()
-            self.content_text.update()
-            self.dialog_box.update()
-        else:
+        if self.m_ref.value is None or self.m_ref.value == "":
             self.title_text.value = "Erreur"
-            self.content_text.value = f"Vous ne pouvez pas supprimer cette référence\nson historique n'est pas nulle"
+            self.content_text.value = "Selectionnez une référence"
             self.dialog_box.open = True
             self.title_text.update()
             self.content_text.update()
             self.dialog_box.update()
-            self.fill_table()
+
+        else:
+            if backend.check_ref_in_devis(self.m_ref.value):
+                self.title_text.value = "Erreur"
+                self.content_text.value = "la référence est deja utilisée dans un devis"
+                self.dialog_box.open = True
+                self.title_text.update()
+                self.content_text.update()
+                self.dialog_box.update()
+            else:
+                backend.delete_ref(self.m_ref.value)
+                self.title_text.value = "confirmation"
+                self.content_text.value = "Reference supprimée"
+                self.dialog_box.open = True
+                self.title_text.update()
+                self.content_text.update()
+                self.dialog_box.update()
+                self.fill_table()
 
     @staticmethod
     def extraire_stock(e: ft.FilePickerResultEvent):
@@ -662,7 +669,7 @@ class Stocks(ft.UserControl):
                         expand=True,
                         height=768,
                         alignment=ft.alignment.center,
-                        spacing=10,
+                        spacing=10, scroll=ft.ScrollMode.ADAPTIVE,
                         controls=[
                             ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
                             self.filter_container,

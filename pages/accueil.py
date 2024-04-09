@@ -38,7 +38,7 @@ class Accueil(ft.UserControl):
                 expand=True,
                 height=700,
                 controls=[
-                    ft.Text("Login", size=24, font_family="Poppins Bold"),
+                    ft.Text("Login", style=ft.TextStyle(size=24, font_family="Poppins ExtraBold")),
                     ft.Divider(height=2, color="transparent"),
                     self.login,
                     self.password,

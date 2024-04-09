@@ -38,7 +38,7 @@ standard_tf_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -51,7 +51,7 @@ remise_tf_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -63,7 +63,7 @@ lettres_tf_style: dict = dict(
     dense=True,
     label="Montant en lettres",
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -75,7 +75,7 @@ date_tf_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -87,7 +87,7 @@ statut_tf_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -99,7 +99,7 @@ devis_tf_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -111,7 +111,7 @@ montant_tf_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -133,7 +133,7 @@ devis_num_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -153,7 +153,7 @@ new_remise_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -172,7 +172,7 @@ new_qte_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -183,7 +183,7 @@ new_prix_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -196,7 +196,7 @@ mt_lettres_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -216,7 +216,7 @@ bc_tf_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -237,7 +237,7 @@ new_payment_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -255,4 +255,16 @@ table_paiements_style: dict = dict(
         ft.DataColumn(ft.Text('date', size=12, style=ft.TextStyle(font_family="Poppins Black"))),
     ],
     rows=[]
+)
+search_style: dict = dict(
+    width=250,
+    height=50,
+    label="NOM CLIENT",
+    label_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    text_size=14,
+    content_padding=12,
+    cursor_height=24
 )

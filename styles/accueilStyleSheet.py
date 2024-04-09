@@ -9,7 +9,7 @@ loginstyle: dict = dict(
     label_style=ft.TextStyle(size=12, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     # dense=True,
-    border_radius=20,
+    border_radius=5,
     text_size=14,
     content_padding=12
 )
@@ -21,7 +21,7 @@ passwordstyle: dict = dict(
     label_style=ft.TextStyle(size=12, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     # dense=True,
-    border_radius=20,
+    border_radius=5,
     text_size=14,
     content_padding=12,
     can_reveal_password=True,

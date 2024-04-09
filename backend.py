@@ -1,5 +1,6 @@
 import sqlite3 as sql
 import datetime
+from others.useful_fonctions import convertir_date_en_objet
 
 today = datetime.date.today()
 my_base = "facturier.db"
@@ -64,7 +65,8 @@ def connexion_base():
                     montant_lettres TEXT,
                     devis           TEXT,
                     bc_client       TEXT,
-                    ov              TEXT)""")
+                    ov              TEXT,
+                    delai           INTEGER)""")
 
     cur.execute("""CREATE TABLE IF NOT EXISTS facture_details (
                     id        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -175,26 +177,46 @@ def add_devis(numero, date, client, montant, objet, remise, montant_lettres, not
     conn.close()
 
 
+def check_ref_in_devis(reference):
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT reference FROM devis_details""")
+    resultat = cur.fetchall()
+    r_final = []
+
+    for row in resultat:
+        r_final.append(row[0])
+
+    conn.commit()
+    conn.close()
+    return True if reference in r_final else False
+
+
 def update_devis_details(ref, qte, prix, id_det):
     conn = sql.connect(my_base)
     cur = conn.cursor()
     cur.execute("""UPDATE devis_details SET 
                                         reference = ?,
                                         qte = ?,
-                                        prix = ?
+                                        prix = ?  
                                         WHERE id = ?""", (ref, qte, prix, id_det))
     conn.commit()
     conn.close()
 
 
-def update_devis(montant, remise, montant_lettres, numero):
+def update_devis(montant, remise, montant_lettres, numero, note_bene, delai, point_liv, validite, paiement):
     conn = sql.connect(my_base)
     cur = conn.cursor()
     cur.execute("""UPDATE devis SET 
                     montant = ?,
                     remise = ?,
-                    montant_lettres = ?
-                    WHERE numero = ?""", (montant, remise, montant_lettres, numero))
+                    montant_lettres = ?,
+                    note_bene = ?,
+                    delai = ?,
+                    point_liv = ?,
+                    validite = ?,
+                    paiement = ?
+                    WHERE numero = ?""", (montant, remise, montant_lettres, numero, note_bene, delai, point_liv, validite, paiement))
     conn.commit()
     conn.close()
 
@@ -271,6 +293,19 @@ def search_devis_details(numero):
     return r_final
 
 
+def all_devis_by_client_id(client_id):
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT numero FROM devis WHERE client = ?""", (client_id,))
+    final = []
+    res = cur.fetchall()
+    for dev in res:
+        final.append(dev[0])
+    conn.commit()
+    conn.close()
+    return final
+
+
 def add_devis_details(numero, reference, qte, prix):
     conn = sql.connect(my_base)
     cur = conn.cursor()
@@ -322,6 +357,21 @@ def all_devis_rech(numero):
     cur = conn.cursor()
     num = "%" + numero + "%"
     cur.execute("""SELECT numero from devis WHERE numero LIKE ?""", (num,))
+    resultat = cur.fetchall()
+    r_final = []
+
+    for row in resultat:
+        r_final.append(row[0])
+
+    conn.commit()
+    conn.close()
+    return r_final
+
+
+def all_devis_by_client_id(client):
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT numero from devis WHERE client = ? ORDER BY id DESC""", (client,))
     resultat = cur.fetchall()
     r_final = []
 
@@ -392,7 +442,7 @@ def id_client_by_name(nom):
     result = cur.fetchone()
     conn.commit()
     conn.close()
-    return result[0]
+    return result
 
 
 def add_client(nom, ini, cont, nui, rc, mail, comm):
@@ -494,13 +544,13 @@ def infos_clients_par_id(id_client):
 
 
 # table factures _____________________________________________________________________
-def add_facture(numero, client, montant, objet, remise, montant_lettres, devis, bc_client, ov):
+def add_facture(numero, client, montant, objet, remise, montant_lettres, devis, bc_client, ov, delai):
     global today
     conn = sql.connect(my_base)
     cur = conn.cursor()
     cur.execute("""INSERT INTO factures values 
-                    (?,?,?,?,?,?,?,?,?,?,?)""",
-                (cur.lastrowid, numero, today, client, montant, objet, remise, montant_lettres, devis, bc_client, ov))
+                    (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (cur.lastrowid, numero, today, client, montant, objet, remise, montant_lettres, devis, bc_client, ov, delai))
     conn.commit()
     conn.close()
 
@@ -572,6 +622,19 @@ def show_info_factures(numero):
     conn.commit()
     conn.close()
     return resultat
+
+
+def all_factures_by_client_id(client_id):
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT numero FROM factures WHERE client = ?""", (client_id,))
+    final = []
+    res = cur.fetchall()
+    for dev in res:
+        final.append(dev[0])
+    conn.commit()
+    conn.close()
+    return final
 
 
 def search_factures_details(numero):
@@ -1246,6 +1309,19 @@ def all_commandes():
     return result
 
 
+def all_commandes_by_fournisseur_id(fourn_id):
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT numero FROM commandes WHERE fournisseur = ?""", (fourn_id,))
+    result = cur.fetchall()
+    final = []
+    for row in result:
+        final.append(row[0])
+    conn.commit()
+    conn.close()
+    return final
+
+
 def list_commandes():
     conn = sql.connect(my_base)
     cur = conn.cursor()
@@ -1378,15 +1454,88 @@ def find_bc_by_devis(devis):
     return res[0]
 
 
-def func():
+def delais_by_numero():
     conn = sql.connect(my_base)
     cur = conn.cursor()
-    cur.execute("""""")
+    cur.execute("""SELECT numero, date, validite FROM devis WHERE statut = ?""", ("Non facturé", ))
+    res = cur.fetchall()
+
+    intermediaire = []
+    final = []
+    date_du_jour = datetime.date.today()
+    date_du_jour = datetime.date(2024, 5, 1)
+
+    for row in res:
+        jour = row[1]
+        delai = int(row[2])*30
+        date_emission = datetime.date(int(jour[0:4]), int(jour[5:7]), int(jour[8:]))
+        date_butoire = date_emission + datetime.timedelta(days=delai)
+        difference = (date_butoire - date_du_jour).days
+
+        row = row + (str(date_butoire), difference)
+        intermediaire.append(row)
+
+    for row in intermediaire:
+        if row[4] <= 15:
+            final.append(row)
+
     conn.commit()
     conn.close()
+    return final
+
+
+def delais_by_factures():
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT numero, date, 
+                    (SELECT sum(montant) FROM reglement WHERE reglement.facture = factures.numero) as total_regle,
+                    delai, montant FROM factures""")
+    res = cur.fetchall()
+    inter = []
+    intermediaire = []
+    final = []
+    date_du_jour = datetime.date.today()
+    date_du_jour = datetime.date(2024, 5, 1)
+
+    for line in res:
+        if line[2] is None:
+            reglement = 0
+        else:
+            reglement = line[2]
+
+        line = line + (reglement,)
+        new_line = list(line)
+        new_line.pop(2)
+        inter.append(new_line)
+
+    for line in inter:
+        jour = line[1]
+        delai = int(line[2])
+        date_emission = datetime.date(int(jour[0:4]), int(jour[5:7]), int(jour[8:]))
+        date_butoire = date_emission + datetime.timedelta(days=delai)
+        difference = (date_butoire - date_du_jour).days
+
+        line.append(str(date_butoire))
+        line.append(difference)
+        intermediaire.append(line)
+
+    for line in intermediaire:
+        if line[3] - line[4] > 0:
+            if line[6] <= 15:
+                final.append(line)
+
+    conn.commit()
+    conn.close()
+    return final
 
 
 
+# def func():
+#     conn = sql.connect(my_base)
+#     cur = conn.cursor()
+#     cur.execute("""""")
+#     conn.commit()
+#     conn.close()
 
 
 

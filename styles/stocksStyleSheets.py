@@ -7,7 +7,7 @@ name_bar_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium"),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=12,
     content_padding=12,
     capitalization=ft.TextCapitalization.CHARACTERS,
@@ -81,7 +81,7 @@ new_ref_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -92,7 +92,7 @@ edit_ref_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=10),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -106,7 +106,7 @@ edit_des_style: dict = dict(
     capitalization=ft.TextCapitalization.CHARACTERS,
     text_style=ft.TextStyle(font_family="Poppins Medium", size=10),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -119,7 +119,7 @@ edit_qte_style_2: dict = dict(
     max_lines=3,
     text_style=ft.TextStyle(font_family="Poppins Medium", size=10),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -132,7 +132,7 @@ edit_unit_style_2: dict = dict(
     max_lines=3,
     text_style=ft.TextStyle(font_family="Poppins Medium", size=10),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -145,7 +145,7 @@ edit_nat_style_2: dict = dict(
     max_lines=3,
     text_style=ft.TextStyle(font_family="Poppins Medium", size=10),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -155,7 +155,7 @@ edit_qte_style: dict = dict(
     label_style=ft.TextStyle(size=10, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=10),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12,
     label="qté",
@@ -166,7 +166,7 @@ edit_prix_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=10),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12,
     label="prix",
@@ -208,7 +208,7 @@ achat_ref_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium", color=ft.colors.BLACK87),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=14, color=ft.colors.BLACK87),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     content_padding=12
 )
 achat_des_style: dict = dict(
@@ -218,7 +218,7 @@ achat_des_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=14),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     capitalization=ft.TextCapitalization.CHARACTERS,
     content_padding=12
 )
@@ -229,7 +229,7 @@ achat_qte_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=14),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     capitalization=ft.TextCapitalization.CHARACTERS,
     content_padding=12,
     input_filter=ft.NumbersOnlyInputFilter(),
@@ -240,7 +240,7 @@ achat_stock_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=14),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     capitalization=ft.TextCapitalization.CHARACTERS,
     content_padding=12,
     input_filter=ft.NumbersOnlyInputFilter(),
@@ -252,7 +252,7 @@ achat_prix_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=14),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     capitalization=ft.TextCapitalization.CHARACTERS,
     input_filter=ft.NumbersOnlyInputFilter(),
     content_padding=12
@@ -265,7 +265,7 @@ achat_com_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=14),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     capitalization=ft.TextCapitalization.CHARACTERS,
     content_padding=12
 )

@@ -11,6 +11,18 @@ filter_container_style: dict = dict(
     border=ft.border.all(1, color="#ebebeb"),
     border_radius=8,
 )
+standard_tf_style: dict = dict(
+    width=300,
+    multiline=True,
+    height=50,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    border_radius=0,
+    text_size=14,
+    content_padding=12
+)
 table_container_style: dict = dict(
     # expand=True,
     padding=ft.padding.only(left=5, right=5, top=2, bottom=2),
@@ -53,6 +65,18 @@ table_details_factures_style: dict = dict(
     ],
     rows=[]
 )
+search_style: dict = dict(
+    width=250,
+    height=50,
+    label="NOM CLIENT",
+    label_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    text_size=14,
+    content_padding=12,
+    cursor_height=24
+)
 infos_style: dict = dict(
     width=200,
     multiline=True,
@@ -61,7 +85,7 @@ infos_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -73,7 +97,7 @@ new_cli_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )
@@ -85,7 +109,7 @@ contact_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12,
     prefix_text="+237 ",
@@ -99,7 +123,7 @@ initiales_style: dict = dict(
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12,
     max_length=3
@@ -111,7 +135,7 @@ courrier_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
     text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
     dense=True,
-    border_radius=6,
+    border_radius=0,
     text_size=14,
     content_padding=12
 )

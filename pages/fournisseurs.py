@@ -13,8 +13,7 @@ class Fournisseurs(ft.UserControl):
             selected_index=2,
             label_type=ft.NavigationRailLabelType.ALL,
             min_width=100,
-            # min_extended_width=400,
-            leading=ft.Text("MENU", style=ft.TextStyle(size=20, font_family="Poppins Bold", decoration=ft.TextDecoration.UNDERLINE)),
+            leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             destinations=[
                 ft.NavigationRailDestination(
@@ -53,9 +52,38 @@ class Fournisseurs(ft.UserControl):
         # titre ___________________________________________________________________________
         self.title_page = ft.Text("FOURNISSEURS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
         # filtre containers ______________________________________________________
-        self.filtre = ft.Text("Filtre", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
-        self.fournisseur_name = ft.Dropdown(**filter_name_style, on_change=self.on_change_fournisseur_name)
+
+        self.fournisseur_name = ft.TextField(**search_style, on_change=self.changement_client)
         self.fourniseur_id = ft.Text("", visible=False)
+
+        self.filtre_clients = ft.TextField(**standard_tf_style, hint_text="rechercher fourniseur...", on_change=self.on_change_look_clients)
+        self.choix = ft.Text("", visible=False)
+        self.afficher_infos = ft.IconButton(ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher", on_click=self.open_select_cli_windows)
+        self.look_table = ft.DataTable(
+            columns=[ft.DataColumn(ft.Text("Nom fournisseur", style=ft.TextStyle(size=12, font_family="Poppins Black")))],
+            rows=[]
+        )
+        self.select_cli_window = ft.Card(
+            elevation=30, expand=True,
+            top=5, left=300,
+            height=700, width=500,
+            scale=ft.transform.Scale(scale=0),
+            animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
+            content=ft.Container(
+                padding=20,
+                bgcolor="white",
+                content=ft.Column(
+                    expand=True, height=600,
+                    controls=[
+                        ft.Text("Selectionner fournisseur", size=20, font_family="Poppins Regular"),
+                        ft.Divider(height=20, color="transparent"),
+                        self.filtre_clients,
+                        self.choix,
+                        ft.Column([self.look_table], scroll=ft.ScrollMode.ADAPTIVE, height=500),
+                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                )
+            )
+        )
         self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
         self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer fournisseur", on_click=self.open_new_fournisseur_window)
         self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier fournisseur", on_click=self.open_edit_fournisseur_window)
@@ -64,13 +92,13 @@ class Fournisseurs(ft.UserControl):
                 **filter_container_style,
                 content=ft.Row(
                     [
-                        ft.Row([self.filtre, self.fournisseur_name, self.fourniseur_id]),
+                        ft.Row([self.fournisseur_name, self.fourniseur_id, self.afficher_infos]),
                         ft.Row([self.actions, self.add, self.edit])
                     ], alignment="spaceBetween"
                 )
-            )
+        )
 
-        # container commandes table ___________________________________________________________________________
+        # conteneur commandes table ___________________________________________________________________________
         self.table_commandes = ft.DataTable(**table_commande_style)
         self.data_not_found = ft.Text(
             "Aucune donnée trouvée",
@@ -163,8 +191,7 @@ class Fournisseurs(ft.UserControl):
             ]
         )
         # fonctions à executer sans venements ____________________________________________
-        self.load_fournisseurs_list()
-        self.fill_command_table()
+        self.load_all_fournisseurs_name()
 
     # functions ___________________________________________________________________________________________________
     def switch_page(self, e):
@@ -174,48 +201,59 @@ class Fournisseurs(ft.UserControl):
         ]
         self.page.go(f"/{pages[e.control.selected_index]}")
 
-    def load_fournisseurs_list(self):
-        for data in backend.all_fournisseur_name():
-            self.fournisseur_name.options.append(
-                ft.dropdown.Option(data)
+    def open_select_cli_windows(self, e):
+        self.select_cli_window.scale = 1
+        self.select_cli_window.update()
+
+    def load_all_fournisseurs_name(self):
+        for row in self.look_table.rows[:]:
+            self.look_table.rows.remove(row)
+
+        datas = backend.all_fournisseur_name()
+        for data in datas:
+            self.look_table.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(
+                            ft.Text(f"{data.upper()}", style=ft.TextStyle(font_family="poppins Medium", size=12))
+                        )
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
+                )
             )
 
-    def fill_command_table(self):
-        for row in self.table_commandes.rows[:]:
-            self.table_commandes.rows.remove(row)
+    def on_change_look_clients(self, e):
+        for row in self.look_table.rows[:]:
+            self.look_table.rows.remove(row)
 
-        for data in backend.all_commandes():
-            if data[4] == "en cours":
-                self.table_commandes.rows.append(
-                    ft.DataRow(
-                        cells=[
-                            ft.DataCell(ft.Text(data[0].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(ft.Text(data[1].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(ft.Icon(ft.icons.CIRCLE, color=ft.colors.RED_300))
-                        ],
-                        on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
-                    )
-                )
-            else:
-                self.table_commandes.rows.append(
-                    ft.DataRow(
-                        cells=[
-                            ft.DataCell(
-                                ft.Text(data[0].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(
-                                ft.Text(data[1].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(
-                                ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                            ft.DataCell(ft.Icon(ft.icons.CIRCLE, color="green"))
-                        ],
-                        on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
-                    )
-                )
+        datas = []
+        for data in backend.all_fournisseur_name():
+            dico = {"client": data}
+            datas.append(dico)
 
-    def on_change_fournisseur_name(self, e):
+        myfiler = list(filter(lambda x: self.filtre_clients.value.lower() in x['client'].lower(), datas))
+
+        for row in myfiler:
+            self.look_table.rows.append(
+                ft.DataRow(cells=[
+                    ft.DataCell(ft.Text(f"{row['client']}", style=ft.TextStyle(font_family="Poppins Medium", size=12)))
+                ],
+                    on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
+                )
+            )
+        self.look_table.update()
+
+    def on_select_change_filtre(self, e):
+        self.choix.value = e
+        self.choix.update()
+        self.fournisseur_name.value = self.choix.value
+        self.fournisseur_name.update()
+        self.select_cli_window.scale = 0
+        self.select_cli_window.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
+        self.select_cli_window.update()
+        self.changement_client_2()
+
+    def changement_client(self, e):
         for row in self.table_commandes.rows[:]:
             self.table_commandes.rows.remove(row)
 
@@ -244,10 +282,14 @@ class Fournisseurs(ft.UserControl):
                         self.table_commandes.rows.append(
                             ft.DataRow(
                                 cells=[
-                                    ft.DataCell(ft.Text(data["N° commande"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                    ft.DataCell(ft.Text(data["date"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                    ft.DataCell(ft.Text(data["fournisseur"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                    ft.DataCell(ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                    ft.DataCell(ft.Text(data["N° commande"].upper(),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["date"],
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["fournisseur"].upper(),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["montant"],
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                     ft.DataCell(ft.Icon(ft.icons.CIRCLE, color=ft.colors.RED_300))
                                 ],
                                 on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
@@ -259,13 +301,13 @@ class Fournisseurs(ft.UserControl):
                             ft.DataRow(
                                 cells=[
                                     ft.DataCell(ft.Text(data["N° commande"].upper(),
-                                                        style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                     ft.DataCell(ft.Text(data["date"],
-                                                        style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                     ft.DataCell(ft.Text(data["fournisseur"].upper(),
-                                                        style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                     ft.DataCell(ft.Text(data["montant"],
-                                                        style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                     ft.DataCell(ft.Icon(ft.icons.CIRCLE, color="green"))
                                 ],
                                 on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
@@ -292,12 +334,16 @@ class Fournisseurs(ft.UserControl):
                         ft.DataRow(
                             cells=[
                                 ft.DataCell(
-                                    ft.Text(data[0].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                    ft.Text(data[0].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(
-                                    ft.Text(data[1].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                    ft.Text(data[1].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(
-                                    ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                    ft.Text(data[2].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(ft.Icon(ft.icons.CIRCLE, color=ft.colors.RED_300))
                             ],
                             on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
@@ -309,15 +355,151 @@ class Fournisseurs(ft.UserControl):
                             cells=[
                                 ft.DataCell(
                                     ft.Text(data[0].upper(),
-                                            style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(
                                     ft.Text(data[1].upper(),
-                                            style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(
                                     ft.Text(data[2].upper(),
-                                            style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(
-                                    ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                    ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Icon(ft.icons.CIRCLE, color="green"))
+                            ],
+                            on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
+                        )
+                    )
+
+            self.table_commandes.update()
+
+        infos_fournisseur = backend.infos_fournisseur_by_name(self.fournisseur_name.value)
+
+        self.fourniseur_id.value = infos_fournisseur[0]
+        self.fourn_rcmm.value = infos_fournisseur[5]
+        self.fourn_nui.value = infos_fournisseur[4]
+        self.fourn_tel.value = infos_fournisseur[3]
+        self.fourn_init.value = infos_fournisseur[2]
+        self.fourn_mail.value = infos_fournisseur[6]
+        self.fourn_comm.value = infos_fournisseur[7]
+        self.fourniseur_id.update()
+        self.fourn_rcmm.update()
+        self.fourn_nui.update()
+        self.fourn_tel.update()
+        self.fourn_init.update()
+        self.fourn_mail.update()
+        self.fourn_comm.update()
+
+    def changement_client_2(self):
+        for row in self.table_commandes.rows[:]:
+            self.table_commandes.rows.remove(row)
+
+        command_list = backend.all_commandes()
+        datas = []
+        for data in command_list:
+            dico = {
+                "N° commande": data[0],
+                "date": data[1],
+                "fournisseur": data[2],
+                "montant": data[3],
+                "statut": data[4]
+            }
+            datas.append(dico)
+
+        f = self.fournisseur_name.value
+
+        myfiler = list(filter(lambda x: f in x['fournisseur'], datas))
+
+        if f != "":
+            if len(myfiler) > 0:
+                self.data_not_found.visible = False
+                self.data_not_found.update()
+                for data in myfiler:
+                    if data["statut"] == "en cours":
+                        self.table_commandes.rows.append(
+                            ft.DataRow(
+                                cells=[
+                                    ft.DataCell(ft.Text(data["N° commande"].upper(),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["date"],
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["fournisseur"].upper(),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["montant"],
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Icon(ft.icons.CIRCLE, color=ft.colors.RED_300))
+                                ],
+                                on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
+                            )
+                        )
+                        self.table_commandes.update()
+                    else:
+                        self.table_commandes.rows.append(
+                            ft.DataRow(
+                                cells=[
+                                    ft.DataCell(ft.Text(data["N° commande"].upper(),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["date"],
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["fournisseur"].upper(),
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Text(data["montant"],
+                                                        style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                    ft.DataCell(ft.Icon(ft.icons.CIRCLE, color="green"))
+                                ],
+                                on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
+                            )
+                        )
+                        self.table_commandes.update()
+
+            else:
+                for row in self.table_commandes.rows[:]:
+                    self.table_commandes.rows.remove(row)
+
+                self.table_commandes.update()
+                self.data_not_found.visible = True
+                self.data_not_found.update()
+
+                for row in self.table_details_commandes.rows[:]:
+                    self.table_details_commandes.rows.remove(row)
+
+                self.table_details_commandes.update()
+        else:
+            for data in backend.all_commandes():
+                if data[4] == "en cours":
+                    self.table_commandes.rows.append(
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(
+                                    ft.Text(data[0].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data[1].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data[2].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Icon(ft.icons.CIRCLE, color=ft.colors.RED_300))
+                            ],
+                            on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
+                        )
+                    )
+                else:
+                    self.table_commandes.rows.append(
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(
+                                    ft.Text(data[0].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data[1].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data[2].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(ft.Icon(ft.icons.CIRCLE, color="green"))
                             ],
                             on_select_changed=lambda e: self.select_command(e.control.cells[0].content.value)
@@ -354,10 +536,12 @@ class Fournisseurs(ft.UserControl):
             self.table_details_commandes.rows.append(
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(backend.search_designation(data[2])[0].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data[4], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(
+                            ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(backend.search_designation(data[2])[0].upper(),
+                                            style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data[4], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                     ]
                 )
             )
@@ -437,40 +621,46 @@ class Fournisseurs(ft.UserControl):
                 widget.update()
 
     def build(self):
-        return ft.Container(
-            expand=True,
-            height=768,
-            padding=ft.padding.only(top=10, bottom=10, left=20, right=20),
-            content=ft.Row(
-                expand=True,
-                height=768,
-                controls=[
-                    self.rail,
-                    ft.VerticalDivider(width=20, color="#ededed"),
-                    ft.Column(
+        return ft.Stack(
+            controls=[
+                ft.Container(
+                    expand=True,
+                    height=768,
+                    padding=ft.padding.only(top=10, bottom=10, left=20, right=20),
+                    content=ft.Row(
                         expand=True,
-                        height=820,
-                        alignment=ft.alignment.center,
-                        spacing=10,
+                        height=768,
                         controls=[
-                            ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
-                            self.filter_container,
-                            ft.Row(
-                                [
-                                    ft.Column(
+                            self.rail,
+                            ft.VerticalDivider(width=20, color="#ededed"),
+                            ft.Column(
+                                expand=True,
+                                height=820,
+                                alignment=ft.alignment.center,
+                                spacing=10,
+                                controls=[
+                                    ft.Container(**title_container_style,
+                                                 content=ft.Row([self.title_page], alignment="spaceBetween")),
+                                    self.filter_container,
+                                    ft.Row(
                                         [
-                                            self.table_container, self.table_details_container
-                                        ], expand=True, height=500
-                                    ),
-                                    self.news_container
-                                ], vertical_alignment=ft.CrossAxisAlignment.START
-                            )
+                                            ft.Column(
+                                                [
+                                                    self.table_container, self.table_details_container
+                                                ], expand=True, height=500
+                                            ),
+                                            self.news_container
+                                        ], vertical_alignment=ft.CrossAxisAlignment.START
+                                    )
 
+                                ]
+                            ),
+                            # dialogs boxes
+                            self.new_fournisseur_window,
+                            self.edit_fournisseur_window,
                         ]
-                    ),
-                    # dialogs boxes
-                    self.new_fournisseur_window,
-                    self.edit_fournisseur_window
-                ]
-            )
+                    )
+                ),
+                self.select_cli_window
+            ]
         )

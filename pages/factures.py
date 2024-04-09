@@ -19,8 +19,7 @@ class Factures(ft.UserControl):
             selected_index=5,
             label_type=ft.NavigationRailLabelType.ALL,
             min_width=100,
-            # min_extended_width=400,
-            leading=ft.Text("MENU", style=ft.TextStyle(size=20, font_family="Poppins Bold", decoration=ft.TextDecoration.UNDERLINE)),
+            leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             destinations=[
                 ft.NavigationRailDestination(
@@ -57,19 +56,114 @@ class Factures(ft.UserControl):
             on_change=self.switch_page
         )
         self.title_page = ft.Text("FACTURES", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
-        # filtres container ____________________________________________________________________
-        self.filtre = ft.Text("Filtre", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
-        self.search_facture = ft.Dropdown(**filter_name_style, on_change=self.on_change_facture)
-        self.client_id = ft.Text(visible=False)
+
+        # filtres conteneur ____________________________________________________________________
+        self.client_id = ft.Text("", visible=False)
+        self.filtre_clients = ft.TextField(**standard_tf_style, hint_text="rechercher client...", on_change=self.on_change_look_clients)
+        self.choix = ft.Text("", visible=False)
+        self.search_facture = ft.Text("", visible=False)
+        self.aucun_facture = ft.Text("Aucune facture pour ce client", visible=False, size=12, color="red", font_family="Poppins Black")
+        self.search_nomclient = ft.TextField(**search_style, on_change=self.changement_client)
+        self.afficher_infos = ft.IconButton(ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher", on_click=self.open_select_cli_windows)
+        self.chat = ft.IconButton(ft.icons.CHAT_BUBBLE_OUTLINE_SHARP, tooltip="Alertes", on_click=self.open_ecran_notifs)
+        self.nombre_notifs = ft.Text("", size=11, weight="bold", color="white", top=3, right=6)
+        self.notifs = ft.Icon(ft.icons.CIRCLE, color="red", size=20)
+
+        # Notifications sur les alertes
+        self.stats = ft.Stack(
+            controls=[
+                self.chat,
+                ft.Stack(
+                    [
+                        self.notifs, self.nombre_notifs
+                    ], top=-2, right=1
+                )
+            ]
+        )
+        self.table_notifs = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("N° devis", size=12, font_family="Poppins Black")),
+                ft.DataColumn(ft.Text("date emission", size=12, font_family="Poppins Black")),
+                ft.DataColumn(ft.Text("date butoire", size=12, font_family="Poppins Black")),
+                ft.DataColumn(ft.Text("nb jours", size=12, font_family="Poppins Black")),
+            ], rows=[]
+        )
+        self.ecran_notifs = ft.Card(
+            elevation=30, height=500, width=600, expand=True, left=500, top=100,
+            scale=ft.transform.Scale(scale=0),
+            animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.ELASTIC_OUT),
+            content=ft.Container(
+                expand=True, height=500, padding=20, bgcolor="white",
+                content=ft.Column(
+                    height=500, expand=True,
+                    controls=[
+                        ft.Text("Alertes", size=24, font_family="Poppins Regular"),
+                        ft.Divider(height=20, color="transparent"),
+                        ft.Column([self.table_notifs], height=300, expand=True, scroll=ft.ScrollMode.ADAPTIVE),
+                        ft.Divider(height=1),
+                        ft.ElevatedButton(
+                            height=50, color="white", bgcolor=ft.colors.BLACK87, text="Fermer",
+                            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
+                            on_click=self.close_ecran_notifs
+                        )
+                    ]
+                )
+            )
+        )
+        self.look_table = ft.DataTable(
+            columns=[ft.DataColumn(ft.Text("Nom client", style=ft.TextStyle(size=12, font_family="Poppins Black")))],
+            rows=[]
+        )
+        self.select_cli_window = ft.Card(
+            elevation=30, expand=True,
+            top=5, left=300,
+            height=700, width=500,
+            scale=ft.transform.Scale(scale=0),
+            animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
+            content=ft.Container(
+                padding=ft.padding.all(20),
+                bgcolor="white",
+                content=ft.Column(
+                    expand=True, height=600,
+                    controls=[
+                        ft.Text("Selectionner client", size=20, font_family="Poppins Regular"),
+                        ft.Divider(height=20, color="transparent"),
+                        self.filtre_clients,
+                        self.choix,
+                        ft.Column([self.look_table], scroll=ft.ScrollMode.ADAPTIVE, height=500),
+                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                )
+            )
+        )
+        self.list_factures_table = ft.DataTable(
+            columns=[ft.DataColumn(ft.Text("N° Facture", size=12, font_family="Poppins Black"))],
+            rows=[]
+        )
+        self.list_factures_container = ft.Container(
+            **standard_ct_style,
+            height=300, width=300,
+            content=ft.Column(
+                [self.list_factures_table, self.aucun_facture], expand=True,
+                height=300,
+                scroll=ft.ScrollMode.ADAPTIVE,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+        )
+
         self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
         self.bill = ft.IconButton(icon=ft.icons.ADD_CARD_OUTLINED, tooltip="paiment", on_click=self.open_payment_window)
+        self.fp = ft.FilePicker(on_result=self.imprimer_facture)
+        self.print_button = ft.IconButton(
+            ft.icons.PRINT_OUTLINED,
+            tooltip="imprimer facture",
+            on_click=lambda e: self.fp.save_file(allowed_extensions=["pdf"])
+        )
 
         self.filter_container = ft.Container(
             **filter_container_style,
             content=ft.Row(
                 [
-                    ft.Row([self.filtre, self.search_facture, self.client_id]),
-                    ft.Row([self.actions, self.bill])
+                    ft.Row([self.search_facture, self.client_id, self.search_nomclient, self.afficher_infos, self.stats]),
+                    ft.Row([self.actions, self.bill, self.fp, self.print_button])
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             )
@@ -87,8 +181,9 @@ class Factures(ft.UserControl):
             **standard_ct_style,
             content=ft.Column(
                 [
-                    ft.Row([self.client_name, self.date, self.montant, self.remise, self.bc_client]),
-                    ft.Row([self.devis, self.lettres])
+                    ft.Row([self.client_name, self.date, self.montant]),
+                    ft.Row([self.devis, self.remise, self.bc_client]),
+                    self.lettres
                 ]
             )
         )
@@ -96,10 +191,10 @@ class Factures(ft.UserControl):
         self.table_facture = ft.DataTable(**table_details_devis_style)
         self.facture_container = ft.Container(
             **standard_ct_style,
-            height=300, width=650,
+            height=300, width=800,
             content=ft.Column(
                 [self.table_facture], expand=True,
-                height=360,
+                height=300,
                 scroll=ft.ScrollMode.ADAPTIVE,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER)
         )
@@ -107,32 +202,14 @@ class Factures(ft.UserControl):
         self.table_paiments_container = ft.Container(
             **table_container_style,
             expand=True,
-            height=250, width=300,
+            height=200, width=310,
             content=ft.Column(
                 expand=True,
-                height=250,
+                height=200,
                 controls=[self.table_paiments]
             )
         )
-        # impressions options _____________________________________________________________________
-        self.fp = ft.FilePicker(on_result=self.imprimer_facture)
-        self.print_button = ft.ElevatedButton(
-            icon=ft.icons.PRINT_OUTLINED,
-            icon_color="white",
-            color="white",
-            text="imprimer",
-            height=50,
-            bgcolor="red",
-            tooltip="imprimer devis",
-            on_click=lambda e: self.fp.save_file()
-        )
-        self.options_container = ft.Container(
-            **standard_ct_style,
-            content=ft.Row(
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                controls=[self.print_button, self.fp]
-            )
-        )
+
         # Validation impression _____________________________________________________________________
         self.good_impression = ft.AlertDialog(
             title=ft.Text("Confirmation"),
@@ -178,7 +255,7 @@ class Factures(ft.UserControl):
             on_click=lambda _: self.date_picker.pick_date(),
         )
         self.date_paiement = ft.TextField(**new_payment_style, label="date", disabled=True)
-        self.message = ft.Text(visible=False, style=ft.TextStyle(size=13, font_family="Poppins Medium"))
+        self.message = ft.Text(visible=False, style=ft.TextStyle(size=12, font_family="Poppins Medium"))
 
         self.payment_window = ft.AlertDialog(
             title=ft.Text("Paiement"),
@@ -201,8 +278,9 @@ class Factures(ft.UserControl):
                 ft.FilledTonalButton(height=50, text="Fermer", on_click=self.close_payment_window)
             ]
         )
-        # fonctions à loader sans evenements ____________________________________________________________
-        self.load_facture_list()
+        # fonctions à charger sans evenements ____________________________________________________________
+        self.show_alertes()
+        self.load_all_client_name()
 
     # functions ___________________________________________________________________________________________________
     def switch_page(self, e):
@@ -213,15 +291,171 @@ class Factures(ft.UserControl):
         self.page.go(f"/{pages[e.control.selected_index]}")
 
     # first content stack
-    def load_facture_list(self):
-        # chargement des factures
-        for name in backend.all_factures():
-            self.search_facture.options.append(
-                ft.dropdown.Option(name)
+    def show_alertes(self):
+        datas = backend.delais_by_factures()
+        if len(datas) == 0:
+            self.nombre_notifs.visible = False
+            self.notifs.visible = False
+            self.chat.tooltip = "Aucune alerte"
+            self.chat.disabled = True
+        else:
+            self.nombre_notifs.visible = True
+            self.nombre_notifs.value = len(datas)
+            self.notifs.visible = True
+            self.chat.tooltip = f"{len(datas)} alertes"
+            self.chat.disabled = False
+
+    def close_ecran_notifs(self, e):
+        self.ecran_notifs.scale = 0
+        self.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN)
+        self.ecran_notifs.update()
+
+    def open_ecran_notifs(self, e):
+        datas = backend.delais_by_factures()
+        if len(datas) == 0:
+            pass
+        else:
+            self.ecran_notifs.scale = 1
+            self.ecran_notifs.update()
+
+            for row in self.table_notifs.rows[:]:
+                self.table_notifs.rows.remove(row)
+
+            for data in datas:
+                self.table_notifs.rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(ft.Text(data[0], size=12, font_family="Poppins Medium")),
+                            ft.DataCell(ft.Text(ecrire_date(data[1]), size=12, font_family="Poppins Medium")),
+                            ft.DataCell(ft.Text(ecrire_date(data[5]), size=12, font_family="Poppins Medium")),
+                            ft.DataCell(ft.Text(data[6], size=12, font_family="Poppins Medium")),
+                        ]
+                    )
+                )
+            self.table_notifs.update()
+
+    def open_select_cli_windows(self, e):
+        self.select_cli_window.scale = 1
+        self.select_cli_window.update()
+
+    def load_all_client_name(self):
+        for row in self.look_table.rows[:]:
+            self.look_table.rows.remove(row)
+
+        datas = backend.all_clients()
+        for data in datas:
+            self.look_table.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(
+                            ft.Text(f"{data.upper()}", style=ft.TextStyle(font_family="poppins Medium", size=12))
+                        )
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
+                )
             )
+
+    def on_change_look_clients(self, e):
+        for row in self.look_table.rows[:]:
+            self.look_table.rows.remove(row)
+
+        datas = []
+        for data in backend.all_clients():
+            dico = {"client": data}
+            datas.append(dico)
+
+        myfiler = list(filter(lambda x: self.filtre_clients.value.lower() in x['client'].lower(), datas))
+
+        for row in myfiler:
+            self.look_table.rows.append(
+                ft.DataRow(cells=[
+                    ft.DataCell(ft.Text(f"{row['client']}", style=ft.TextStyle(font_family="Poppins Medium", size=12)))
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
+                )
+            )
+        self.look_table.update()
+
+    def on_select_change_filtre(self, e):
+        self.choix.value = e
+        self.choix.update()
+        self.search_nomclient.value = self.choix.value
+        self.search_nomclient.update()
+        self.select_cli_window.scale = 0
+        self.select_cli_window.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
+        self.select_cli_window.update()
+        self.changement_client_2()
+
+    def changement_client(self, e):
+        for row in self.list_factures_table.rows[:]:
+            self.list_factures_table.rows.remove(row)
+
+        if backend.id_client_by_name(self.search_nomclient.value) is None:
+            self.aucun_facture.visible = True
+            self.aucun_facture.update()
+
+        else:
+            self.client_id.value = backend.id_client_by_name(self.search_nomclient.value)[0]
+            self.client_id.update()
+
+            cli_id = int(self.client_id.value)
+            datas = backend.all_factures_by_client_id(cli_id)
+
+            if datas == [] or datas is None:
+                self.aucun_facture.visible = True
+                self.aucun_facture.update()
+            else:
+                for data in datas:
+                    self.list_factures_table.rows.append(
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(ft.Text(data, style=ft.TextStyle(font_family="poppins Medium", size=12)))
+                            ],
+                            on_select_changed=lambda e: self.on_change_facture(e.control.cells[0].content.value)
+                        )
+                    )
+                self.aucun_facture.visible = False
+                self.aucun_facture.update()
+
+            self.list_factures_table.update()
+
+    def changement_client_2(self):
+        for row in self.list_factures_table.rows[:]:
+            self.list_factures_table.rows.remove(row)
+
+        if backend.id_client_by_name(self.search_nomclient.value) is None:
+            self.aucun_facture.visible = True
+            self.aucun_facture.update()
+
+        else:
+            self.client_id.value = backend.id_client_by_name(self.search_nomclient.value)[0]
+            self.client_id.update()
+
+            cli_id = int(self.client_id.value)
+            datas = backend.all_factures_by_client_id(cli_id)
+
+            if datas == [] or datas is None:
+                self.aucun_facture.visible = True
+                self.aucun_facture.update()
+            else:
+                for data in datas:
+                    self.list_factures_table.rows.append(
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(ft.Text(data, style=ft.TextStyle(font_family="poppins Medium", size=12)))
+                            ],
+                            on_select_changed=lambda e: self.on_change_facture(e.control.cells[0].content.value)
+                        )
+                    )
+                self.aucun_facture.visible = False
+                self.aucun_facture.update()
+
+            self.list_factures_table.update()
 
     def on_change_facture(self, e):
         """actions when facture number change"""
+        self.search_facture.value = e
+        self.search_facture.update()
         infos = backend.show_info_factures(self.search_facture.value)
         self.client_id.value = infos[0]
         self.client_name.value = backend.infos_clients(id_client=int(self.client_id.value))[1]
@@ -256,11 +490,11 @@ class Factures(ft.UserControl):
             self.table_facture.rows.append(
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(data["reference"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["designation"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["qte"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["prix"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["total"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(ft.Text(data["reference"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data["designation"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data["qte"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data["prix"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data["total"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                     ]
                 )
             )
@@ -292,11 +526,11 @@ class Factures(ft.UserControl):
                 ft.DataRow(
                     cells=[
                         ft.DataCell(
-                            ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                            ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                         ft.DataCell(
-                            ft.Text(data["type"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                            ft.Text(data["type"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                         ft.DataCell(
-                            ft.Text(data["date"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                            ft.Text(data["date"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                     ]
                 )
             )
@@ -338,7 +572,7 @@ class Factures(ft.UserControl):
             self.message.update()
         else:
             montant = int(self.montant_regle.value)
-            backend.add_reglement(self.m_facture.value, montant, self.mode.value, self.date_paiement.value)
+            backend.add_reglement(self.m_facture.value, montant, self.mode.value, str(self.date_paiement.value)[0:10])
             self.message.value = "paiement validé"
             self.message.visible = True
             self.message.update()
@@ -350,7 +584,7 @@ class Factures(ft.UserControl):
     # fonctions d'impression ______________________________________
     def imprimer_facture(self, e: ft.FilePickerResultEvent):
         save_location = e.path
-        fichier = os.path.abspath(save_location)
+        fichier = f"{os.path.abspath(save_location)}.pdf"
         can = Canvas("{0}".format(fichier), pagesize=A4)
 
         if self.search_facture.value is None:
@@ -555,15 +789,21 @@ class Factures(ft.UserControl):
                                     controls=[
                                         ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
                                         self.filter_container,
-                                        self.infos_container,
-                                        ft.Row([self.facture_container, self.table_paiments_container]),
-                                        self.options_container,
+                                        ft.Row([self.list_factures_container, self.facture_container],
+                                               vertical_alignment=ft.CrossAxisAlignment.START,
+                                               alignment=ft.MainAxisAlignment.START,
+                                               ),
+                                        ft.Row([self.table_paiments_container, self.infos_container],
+                                               vertical_alignment=ft.CrossAxisAlignment.START,
+                                               alignment=ft.MainAxisAlignment.START,
+                                               ),
                                     ]
                                 )
                             ]
                         )
                     ),
-
+                    self.select_cli_window,
+                    self.ecran_notifs,
                     # dialog boxes
                     self.good_impression,
                     self.bad_impression,

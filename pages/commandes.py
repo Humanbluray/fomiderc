@@ -20,8 +20,7 @@ class Commandes(ft.UserControl):
             selected_index=3,
             label_type=ft.NavigationRailLabelType.ALL,
             min_width=100,
-            # min_extended_width=400,
-            leading=ft.Text("MENU", style=ft.TextStyle(size=20, font_family="Poppins Bold", decoration=ft.TextDecoration.UNDERLINE)),
+            leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             destinations=[
                 ft.NavigationRailDestination(
@@ -59,19 +58,51 @@ class Commandes(ft.UserControl):
         )
         self.title_page = ft.Text("COMMANDES", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
 
-        self.filtre = ft.Text("Filtre",
-                              style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
-        self.search_commande = ft.Dropdown(**drop_style, label="N° Commande", on_change=self.on_change_command)
-        self.client_id = ft.Text(visible=False)
-        self.actions = ft.Text("actions",
-                               style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
+        self.search_commande = ft.Text("", visible=False)
+        self.fournisseur_name = ft.TextField(**search_style, on_change=self.changement_client)
+        self.fourniseur_id = ft.Text("", visible=False)
+        self.aucune_commande = ft.Text("Aucune commande", visible=False, size=12, color="red", font_family="Poppins Black")
+
+        self.filtre_clients = ft.TextField(**standard_tf_style, hint_text="rechercher fourniseur...",
+                                           on_change=self.on_change_look_clients)
+        self.choix = ft.Text("", visible=False)
+        self.afficher_infos = ft.IconButton(ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher",
+                                            on_click=self.open_select_cli_windows)
+        self.look_table = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("Nom fournisseur", style=ft.TextStyle(size=12, font_family="Poppins Black")))],
+            rows=[]
+        )
+        self.select_cli_window = ft.Card(
+            elevation=30, expand=True,
+            top=5, left=300,
+            height=700, width=500,
+            scale=ft.transform.Scale(scale=0),
+            animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
+            content=ft.Container(
+                padding=20,
+                bgcolor="white",
+                content=ft.Column(
+                    expand=True, height=600,
+                    controls=[
+                        ft.Text("Selectionner fournisseur", size=20, font_family="Poppins Regular"),
+                        ft.Divider(height=20, color="transparent"),
+                        self.filtre_clients,
+                        self.choix,
+                        ft.Column([self.look_table], scroll=ft.ScrollMode.ADAPTIVE, height=500),
+                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                )
+            )
+        )
+
+        self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
         self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer commande", on_click=self.open_new_commande_window)
         self.receive = ft.IconButton(icon=ft.icons.INVENTORY_OUTLINED, tooltip="Modifier commande", on_click=self.open_receipt_window)
 
         self.save_commandes = ft.FilePicker(on_result=self.extract_commandes)
         self.save_details_com = ft.FilePicker(on_result=self.extract_details_commandes)
         self.cmd_bt = ft.IconButton(ft.icons.UPLOAD_FILE_OUTLINED, tooltip="extraction excel des commandes",
-                                    on_click=lambda e: self.save_commandes.save_file())
+                                    on_click=lambda e: self.save_commandes.save_file(allowed_extensions=["pdf"]))
         self.details_cmd_bt = ft.IconButton(ft.icons.FILE_OPEN, tooltip="extraction excel des details de commandes",
                                             on_click=lambda e: self.save_details_com.save_file())
         self.fp = ft.FilePicker(on_result=self.imprimer_bon_commande)
@@ -81,7 +112,7 @@ class Commandes(ft.UserControl):
             **filter_container_style,
             content=ft.Row(
                 [
-                    ft.Row([self.filtre, self.search_commande, self.client_id]),
+                    ft.Row([self.fournisseur_name, self.fourniseur_id, self.search_commande, self.afficher_infos]),
                     ft.Row([self.actions, self.add, self.receive, self.save_commandes, self.save_details_com, self.cmd_bt, self.details_cmd_bt, self.print_bc])
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
@@ -104,6 +135,16 @@ class Commandes(ft.UserControl):
             )
         )
         # table details devis__________________________________________________________________________
+        self.table_des_commandes = ft.DataTable(**table_des_commande_style)
+        self.list_commande_container = ft.Container(
+            **menu_container_style,
+            height=300, width=250,
+            content=ft.Column(
+                [self.table_des_commandes, self.aucune_commande], expand=True,
+                height=360,
+                scroll=ft.ScrollMode.ADAPTIVE,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+        )
         self.table_commande = ft.DataTable(**table_commande_style)
         self.commande_container = ft.Container(
             **menu_container_style,
@@ -260,8 +301,8 @@ class Commandes(ft.UserControl):
             actions=[ft.FilledTonalButton(text="Fermer", on_click=self.close_confirmation_box, height=50)]
         )
         # Fonctions à charger sans évènements
-        self.load_all_commandes()
-        self.load_all_fournisseurs()
+
+        self.load_all_fournisseurs_name()
         self.load_edit_ref_list()
 
     # functions __________________________________________________________________________________________
@@ -272,9 +313,167 @@ class Commandes(ft.UserControl):
         ]
         self.page.go(f"/{pages[e.control.selected_index]}")
 
+    def open_select_cli_windows(self, e):
+        self.select_cli_window.scale = 1
+        self.select_cli_window.update()
+
+    def load_all_fournisseurs_name(self):
+        for row in self.look_table.rows[:]:
+            self.look_table.rows.remove(row)
+
+        datas = backend.all_fournisseur_name()
+        for data in datas:
+            self.look_table.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(
+                            ft.Text(f"{data.upper()}", style=ft.TextStyle(font_family="poppins Medium", size=12))
+                        )
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
+                )
+            )
+
+    def on_change_look_clients(self, e):
+        for row in self.look_table.rows[:]:
+            self.look_table.rows.remove(row)
+
+        datas = []
+        for data in backend.all_fournisseur_name():
+            dico = {"client": data}
+            datas.append(dico)
+
+        myfiler = list(filter(lambda x: self.filtre_clients.value.lower() in x['client'].lower(), datas))
+
+        for row in myfiler:
+            self.look_table.rows.append(
+                ft.DataRow(cells=[
+                    ft.DataCell(ft.Text(f"{row['client']}", style=ft.TextStyle(font_family="Poppins Medium", size=12)))
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
+                )
+            )
+        self.look_table.update()
+
+    def on_select_change_filtre(self, e):
+        self.choix.value = e
+        self.choix.update()
+        self.fournisseur_name.value = self.choix.value
+        self.fournisseur_name.update()
+        self.select_cli_window.scale = 0
+        self.select_cli_window.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
+        self.select_cli_window.update()
+        self.changement_client_2()
+
+    def changement_client(self, e):
+        for row in self.table_des_commandes.rows[:]:
+            self.table_des_commandes.rows.remove(row)
+
+        if backend.infos_fournisseur_by_name(self.fournisseur_name.value)[0] is None:
+            self.aucune_commande.visible = True
+            self.aucune_commande.update()
+
+        else:
+            self.fourniseur_id.value = backend.infos_fournisseur_by_name(self.fournisseur_name.value)[0]
+            self.fourniseur_id.update()
+
+            cli_id = int(self.fourniseur_id.value)
+            datas = backend.all_commandes_by_fournisseur_id(cli_id)
+
+            if datas == [] or datas is None:
+                self.aucune_commande.visible = True
+                self.aucune_commande.update()
+            else:
+                for data in datas:
+                    self.table_des_commandes.rows.append(
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(ft.Text(data, style=ft.TextStyle(font_family="poppins Medium", size=12)))
+                            ],
+                            on_select_changed=lambda e: self.on_change_command(e.control.cells[0].content.value)
+                        )
+                    )
+                self.aucune_commande.visible = False
+                self.aucune_commande.update()
+
+            self.table_des_commandes.update()
+
+    def changement_client_2(self):
+        for row in self.table_des_commandes.rows[:]:
+            self.table_des_commandes.rows.remove(row)
+
+        if backend.infos_fournisseur_by_name(self.fournisseur_name.value)[0] is None:
+            self.aucune_commande.visible = True
+            self.aucune_commande.update()
+
+        else:
+            self.fourniseur_id.value = backend.infos_fournisseur_by_name(self.fournisseur_name.value)[0]
+            self.fourniseur_id.update()
+
+            cli_id = int(self.fourniseur_id.value)
+            datas = backend.all_commandes_by_fournisseur_id(cli_id)
+
+            if datas == [] or datas is None:
+                self.aucune_commande.visible = True
+                self.aucune_commande.update()
+            else:
+                for data in datas:
+                    self.table_des_commandes.rows.append(
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(ft.Text(data, style=ft.TextStyle(font_family="poppins Medium", size=12)))
+                            ],
+                            on_select_changed=lambda e: self.on_change_command(e.control.cells[0].content.value)
+                        )
+                    )
+                self.aucune_commande.visible = False
+                self.aucune_commande.update()
+
+            self.table_des_commandes.update()
+
+    def on_change_command(self, e):
+        self.search_commande.value = e
+        self.search_commande.update()
+
+        details = backend.show_commande_details(self.search_commande.value)
+
+        self.m_com.value = self.search_commande.value
+        self.m_com.update()
+        self.receipt_number.value = self.search_commande.value.replace("CM", "RC")
+        self.receipt_number.update()
+
+        for row in self.table_commande.rows[:]:
+            self.table_commande.rows.remove(row)
+
+        for data in details:
+            self.table_commande.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(backend.search_designation(data[2])[0].upper(), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(milSep(data[4]), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(str(milSep(data[4] * data[3])), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                    ]
+                )
+            )
+        self.table_commande.update()
+
+        infos = backend.show_infos_commandes(self.search_commande.value)
+        self.montant.value = infos[4]
+        self.lettres.value = infos[5].upper()
+        self.fournisseur.value = backend.infos_fournisseur_by_id(infos[3])[1]
+        self.date.value = infos[2]
+        self.statut.value = infos[6].upper()
+        self.montant.update()
+        self.lettres.update()
+        self.fournisseur.update()
+        self.date.update()
+        self.statut.update()
+
     def imprimer_bon_commande(self, e: ft.FilePickerResultEvent):
-        savelocation = e.path
-        fichier = os.path.abspath(savelocation)
+        save_location = e.path
+        fichier = f"{os.path.abspath(save_location)}.pdf"
         can = Canvas("{0}".format(fichier), pagesize=A4)
 
         # dessin des entêtes
@@ -439,18 +638,6 @@ class Commandes(ft.UserControl):
         self.new_commande_window.scale = 1
         self.new_commande_window.update()
 
-    def load_all_commandes(self):
-        for data in backend.list_commandes():
-            self.search_commande.options.append(
-                ft.dropdown.Option(data)
-            )
-
-    def load_all_fournisseurs(self):
-        for data in backend.all_fournisseur_name():
-            self.n_fournisseur.options.append(
-                ft.dropdown.Option(data)
-            )
-
     def on_change_ref(self, e):
         self.designation.value = backend.search_designation(self.reference.value)[0].upper()
         self.designation.update()
@@ -467,43 +654,6 @@ class Commandes(ft.UserControl):
             self.reference.options.append(
                 ft.dropdown.Option(name)
             )
-
-    def on_change_command(self, e):
-        details = backend.show_commande_details(self.search_commande.value)
-
-        self.m_com.value = self.search_commande.value
-        self.m_com.update()
-        self.receipt_number.value = self.search_commande.value.replace("CM", "RC")
-        self.receipt_number.update()
-
-        for row in self.table_commande.rows[:]:
-            self.table_commande.rows.remove(row)
-
-        for data in details:
-            self.table_commande.rows.append(
-                ft.DataRow(
-                    cells=[
-                        ft.DataCell(ft.Text(data[2].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(backend.search_designation(data[2])[0].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data[3], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(milSep(data[4]), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(str(milSep(data[4] * data[3])), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                    ]
-                )
-            )
-        self.table_commande.update()
-
-        infos = backend.show_infos_commandes(self.search_commande.value)
-        self.montant.value = infos[4]
-        self.lettres.value = infos[5].upper()
-        self.fournisseur.value = backend.infos_fournisseur_by_id(infos[3])[1]
-        self.date.value = infos[2]
-        self.statut.value = infos[6].upper()
-        self.montant.update()
-        self.lettres.update()
-        self.fournisseur.update()
-        self.date.update()
-        self.statut.update()
 
     def add_table_line(self, e):
         if self.prix.value != "" and self.qte.value != "":
@@ -701,14 +851,15 @@ class Commandes(ft.UserControl):
                                     controls=[
                                         ft.Container(**title_container_style, content=ft.Row([self.title_page], alignment="spaceBetween")),
                                         self.filter_container,
+                                        ft.Row([self.list_commande_container, self.commande_container]),
                                         self.infos_container,
-                                        self.commande_container,
                                     ]
                                 )
                             ]
                         )
                     ),
                     self.new_commande_window,
+                    self.select_cli_window,
                     # dialog boxes
                     self.error_box,
                     self.confirmation_box,

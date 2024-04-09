@@ -1,4 +1,7 @@
-def ecrire_date(date):
+import datetime
+
+
+def ecrire_date(date: str):
     """This function writes the date of the day"""
 
     def find_mois(month):
@@ -37,7 +40,7 @@ def ecrire_date(date):
     return str(jour) + " " + m + " " + str(annee)
 
 
-def milSep(nombre):
+def milSep(nombre: int):
     nombre = str(nombre)[::-1]
     resultat = ""
     for i, numero in enumerate(nombre, 1):
@@ -460,6 +463,15 @@ def ecrire_en_lettres(nombre: int):
             lettres = nombre_milliards(nombre)
 
         return f"{lettres.upper()} FCFA"
+
+
+def convertir_date_en_objet(date: str):
+    annee = int(date[0: 4])
+    mois = int(date[5: 7])
+    jour = int(date[8:10])
+
+    objet = datetime.date(annee, mois, jour)
+    return objet
 
 
 # infos de l'entreprise

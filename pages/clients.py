@@ -13,8 +13,7 @@ class Clients(ft.UserControl):
             selected_index=1,
             label_type=ft.NavigationRailLabelType.ALL,
             min_width=100,
-            # min_extended_width=400,
-            leading=ft.Text("MENU", style=ft.TextStyle(size=20, font_family="Poppins Bold", decoration=ft.TextDecoration.UNDERLINE)),
+            leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             destinations=[
                 ft.NavigationRailDestination(
@@ -54,65 +53,59 @@ class Clients(ft.UserControl):
         self.title_page = ft.Text("CLIENTS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
 
         # widgets du filter container ___________________________________________________________________________________
-        self.filtre = ft.Text("Filtre", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
-        self.search_client_name = ft.Dropdown(**filter_name_style, on_change=self.change_client)
-        self.client_id = ft.Text(visible=False)
-        self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
-        self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer client", on_click=self.open_new_cli_window)
-        self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier client", on_click=self.open_edit_cli_window)
-
-        # fenetre de recherche de clients ___________________________________________________________________________
-        self.look_table = ft.DataTable(columns=[ft.DataColumn(ft.Text("nom du client", size=12, font_family="Poppins ExtraBold"))], rows=[])
-        self.filtre_clients = ft.TextField(
-                                border="underline", width=350, content_padding=12, cursor_height=24,
-                                text_style=ft.TextStyle(size=14, font_family="Poppins Medium"),
-                                hint_text="rechercher ici...", hint_style=ft.TextStyle(size=12, font_family="Poppins Medium"),
-                                on_change=self.on_change_look_clients
-                            )
-        self.choix = ft.Text(visible=False)
-        self.look_clients = ft.Card(
+        self.client_id = ft.Text("", visible=False)
+        self.filtre_clients = ft.TextField(**standard_tf_style, hint_text="rechercher client...",
+                                           on_change=self.on_change_look_clients)
+        self.choix = ft.Text("", visible=False)
+        self.search_nomclient = ft.TextField(**search_style, on_change=self.changement_client)
+        self.afficher_infos = ft.IconButton(ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher",
+                                            on_click=self.open_select_cli_windows)
+        self.look_table = ft.DataTable(
+            columns=[ft.DataColumn(ft.Text("Nom client", style=ft.TextStyle(size=12, font_family="Poppins Black")))],
+            rows=[]
+        )
+        self.select_cli_window = ft.Card(
             elevation=30, expand=True,
             top=5, left=300,
-            height=700, width=600,
+            height=700, width=500,
             scale=ft.transform.Scale(scale=0),
             animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
             content=ft.Container(
                 padding=10,
                 bgcolor="white",
                 content=ft.Column(
-                    expand=True, height=500,
+                    expand=True, height=600,
                     controls=[
-                        ft.Container(
-                            **filter_container_style,
-                            content=ft.Row([self.filtre_clients, self.choix])
-                        ),
-                        ft.Column([self.look_table], scroll=ft.ScrollMode.ADAPTIVE, height=400),
-                        ft.Container(
-                            **filter_container_style,
-                            content=ft.Row(
-                                [
-                                    ft.ElevatedButton(text="choisir", bgcolor="red", color="white", on_click=self.select_client_choice, height=50),
-                                    ft.ElevatedButton(text="quitter", bgcolor="red", color="white", on_click=self.close_look_clients_window, height=50)
-                                ]
-                            )
-                        )
-                    ]
+                        ft.Text("Selectionner client", size=20, font_family="Poppins Regular"),
+                        ft.Divider(height=20, color="transparent"),
+                        self.filtre_clients,
+                        self.choix,
+                        ft.Column([self.look_table], scroll=ft.ScrollMode.ADAPTIVE, height=500),
+                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER
                 )
             )
-
         )
+        # actions
+        self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
+        self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer client", on_click=self.open_new_cli_window)
+        self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier client", on_click=self.open_edit_cli_window)
 
         self.filter_container = ft.Container(
             **filter_container_style,
             content=ft.Row(
                 [
-                    ft.Row([self.filtre, self.search_client_name, self.client_id, ft.IconButton(ft.icons.SEARCH, on_click=self.afficher_look_clients_windows)]),
+                    ft.Row(
+                        [
+                            self.search_nomclient, self.client_id,
+                            self.afficher_infos,
+                         ]
+                           ),
                     ft.Row([self.actions, self.add, self.edit])
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             )
         )
-        # widget du container factures _______________________________________________________________________________________________________
+        # widget du conteneur factures _______________________________________________________________________________________________________
         self.table_factures = ft.DataTable(**table_factures_style)
         self.data_not_found = ft.Text(
             "Aucune donnée trouvée",
@@ -122,7 +115,7 @@ class Clients(ft.UserControl):
         self.table_factures_container = ft.Container(
             **table_container_style,
             expand=True,
-            height=250,
+            height=250, width=600,
             content=ft.Column(
                 [self.table_factures, self.data_not_found],
                 expand=True,
@@ -137,10 +130,11 @@ class Clients(ft.UserControl):
         self.table_details_factures_container = ft.Container(
             **table_container_style,
             expand=True,
-            height=250, width=650,
+            height=250, width=800,
             content=ft.Column(
                 expand=True,
-                height=250,
+                height=250, scroll=ft.ScrollMode.ADAPTIVE,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[self.table_details_facture]
             )
         )
@@ -151,7 +145,7 @@ class Clients(ft.UserControl):
             height=250, width=350,
             content=ft.Column(
                 expand=True,
-                height=250,
+                height=250, scroll=ft.ScrollMode.ADAPTIVE,
                 controls=[self.table_paiments]
             )
         )
@@ -225,8 +219,8 @@ class Clients(ft.UserControl):
                 ft.FilledTonalButton(text="fermer", on_click=self.close_edit_cli_window, height=50)
             ]
         )
-        self.load_clients_list()
-        self.load_look_clients_table()
+        # self.load_clients_list()
+        self.load_all_client_name()
 
     # functions _______________________________________________________________________________________________________________________________
     def switch_page(self, e):
@@ -236,22 +230,11 @@ class Clients(ft.UserControl):
         ]
         self.page.go(f"/{pages[e.control.selected_index]}")
 
-    def load_clients_list(self):
-        for name in backend.all_clients():
-            self.search_client_name.options.append(
-                ft.dropdown.Option(name)
-            )
+    def open_select_cli_windows(self, e):
+        self.select_cli_window.scale = 1
+        self.select_cli_window.update()
 
-    def afficher_look_clients_windows(self, e):
-        self.look_clients.scale = 1
-        self.look_clients.update()
-
-    def close_look_clients_window(self, e):
-        self.look_clients.scale = 0
-        self.look_clients.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
-        self.look_clients.update()
-
-    def load_look_clients_table(self):
+    def load_all_client_name(self):
         for row in self.look_table.rows[:]:
             self.look_table.rows.remove(row)
 
@@ -261,7 +244,7 @@ class Clients(ft.UserControl):
                 ft.DataRow(
                     cells=[
                         ft.DataCell(
-                            ft.Text(f"{data}", size=12, font_family="Poppins Medium")
+                            ft.Text(f"{data.upper()}", style=ft.TextStyle(font_family="poppins Medium", size=12))
                         )
                     ],
                     on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
@@ -282,8 +265,8 @@ class Clients(ft.UserControl):
         for row in myfiler:
             self.look_table.rows.append(
                 ft.DataRow(cells=[
-                    ft.DataCell(ft.Text(f"{row['client']}", size=12, font_family="Poppins Medium"))
-                    ],
+                    ft.DataCell(ft.Text(f"{row['client']}", style=ft.TextStyle(font_family="Poppins Medium", size=12)))
+                ],
                     on_select_changed=lambda e: self.on_select_change_filtre(e.control.cells[0].content.value)
                 )
             )
@@ -291,19 +274,21 @@ class Clients(ft.UserControl):
 
     def on_select_change_filtre(self, e):
         self.choix.value = e
+        self.choix.update()
+        self.search_nomclient.value = self.choix.value
+        self.search_nomclient.update()
+        self.select_cli_window.scale = 0
+        self.select_cli_window.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
+        self.select_cli_window.update()
+        self.changement_client_2()
 
-    def select_client_choice(self, e):
-        self.search_client_name.value = self.choix.value
-        self.look_clients.scale = 0
-        self.look_clients.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
-        self.look_clients.update()
-        self.search_client_name.update()
-
-    def change_client(self, e):
-        self.client_id.value = backend.id_client_by_name(self.search_client_name.value)
+    def changement_client(self, e):
+        self.client_id.value = backend.id_client_by_name(self.search_nomclient.value)[0]
         self.client_id.update()
+        cli_id = int(self.client_id.value)
         datas = []
-        for item in backend.factures_client(self.client_id.value):
+
+        for item in backend.factures_client(cli_id):
             dico = {"facture": item[1], "montant": item[2], "perçu": item[3],
                     "reste": item[4], "statut": item[5]}
             datas.append(dico)
@@ -323,11 +308,16 @@ class Clients(ft.UserControl):
                     self.table_factures.rows.append(
                         ft.DataRow(
                             cells=[
-                                ft.DataCell(ft.Text(data["facture"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data["perçu"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data["reste"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data["statut"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                ft.DataCell(ft.Text(data["facture"].upper(),
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Text(data["montant"],
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data["perçu"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data["reste"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Text(data["statut"].upper(),
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(ft.Icon(ft.icons.CIRCLE, size=20, color=ft.colors.RED)),
                             ],
                             on_select_changed=lambda e: self.select_facture(e.control.cells[0].content.value)
@@ -337,11 +327,99 @@ class Clients(ft.UserControl):
                     self.table_factures.rows.append(
                         ft.DataRow(
                             cells=[
-                                ft.DataCell(ft.Text(data["facture"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data["perçu"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data["reste"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                                ft.DataCell(ft.Text(data["statut"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                                ft.DataCell(ft.Text(data["facture"].upper(),
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Text(data["montant"],
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data["perçu"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data["reste"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Text(data["statut"].upper(),
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Icon(ft.icons.CIRCLE, size=20, color=ft.colors.GREEN)),
+                            ],
+                            on_select_changed=lambda e: self.select_facture(e.control.cells[0].content.value)
+                        )
+                    )
+
+            self.data_not_found.visible = False
+            self.data_not_found.update()
+            self.table_factures.update()
+        else:
+            self.data_not_found.visible = True
+            self.data_not_found.update()
+            self.table_factures.update()
+
+        infos = backend.infos_clients(self.client_id.value)
+        self.cli_rcmm.value = infos[5]
+        self.cli_nui.value = infos[4]
+        self.cli_tel.value = infos[3]
+        self.cli_init.value = infos[2]
+        self.cli_mail.value = infos[6]
+        self.cli_comm.value = infos[7]
+        self.cli_rcmm.update()
+        self.cli_nui.update()
+        self.cli_tel.update()
+        self.cli_init.update()
+        self.cli_mail.update()
+        self.cli_comm.update()
+
+    def changement_client_2(self):
+        self.client_id.value = backend.id_client_by_name(self.search_nomclient.value)[0]
+        self.client_id.update()
+        cli_id = int(self.client_id.value)
+
+        datas = []
+        for item in backend.factures_client(cli_id):
+            dico = {"facture": item[1], "montant": item[2], "perçu": item[3],
+                    "reste": item[4], "statut": item[5]}
+            datas.append(dico)
+
+        for item in self.table_factures.rows[:]:
+            self.table_factures.rows.remove(item)
+
+        for item in self.table_details_facture.rows[:]:
+            self.table_details_facture.rows.remove(item)
+
+        self.table_details_facture.update()
+
+        if len(datas) > 0:
+
+            for data in datas:
+                if data["statut"] == "en cours":
+                    self.table_factures.rows.append(
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(ft.Text(data["facture"].upper(),
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Text(data["montant"],
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data["perçu"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data["reste"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Text(data["statut"].upper(),
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Icon(ft.icons.CIRCLE, size=20, color=ft.colors.RED)),
+                            ],
+                            on_select_changed=lambda e: self.select_facture(e.control.cells[0].content.value)
+                        )
+                    )
+                else:
+                    self.table_factures.rows.append(
+                        ft.DataRow(
+                            cells=[
+                                ft.DataCell(ft.Text(data["facture"].upper(),
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Text(data["montant"],
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data["perçu"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(
+                                    ft.Text(data["reste"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                                ft.DataCell(ft.Text(data["statut"].upper(),
+                                                    style=ft.TextStyle(font_family="poppins Medium", size=12))),
                                 ft.DataCell(ft.Icon(ft.icons.CIRCLE, size=20, color=ft.colors.GREEN)),
                             ],
                             on_select_changed=lambda e: self.select_facture(e.control.cells[0].content.value)
@@ -387,11 +465,11 @@ class Clients(ft.UserControl):
             self.table_details_facture.rows.append(
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(data["reference"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["designation"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["qté"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["prix"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
-                        ft.DataCell(ft.Text(data["total"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(ft.Text(data["reference"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data["designation"].upper(), style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data["qté"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data["prix"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(data["total"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                         ft.DataCell(ft.Icon(ft.icons.LOCK_OPEN_OUTLINED, size=14)),
                     ],
                 )
@@ -411,11 +489,11 @@ class Clients(ft.UserControl):
             self.table_paiments.rows.append(
                 ft.DataRow(
                     cells=[
-                        ft.DataCell(ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                        ft.DataCell(ft.Text(data["montant"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                         ft.DataCell(
-                            ft.Text(data["type"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                            ft.Text(data["type"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                         ft.DataCell(
-                            ft.Text(data["date"], style=ft.TextStyle(font_family="poppins Medium", size=11))),
+                            ft.Text(data["date"], style=ft.TextStyle(font_family="poppins Medium", size=12))),
                     ]
                 )
             )
@@ -461,7 +539,7 @@ class Clients(ft.UserControl):
             self.error.update()
 
     def open_edit_cli_window(self, e):
-        self.m_cli_nom.value = self.search_client_name.value
+        self.m_cli_nom.value = self.search_nomclient.value
         self.m_cli_rcmm.value = self.cli_rcmm.value
         self.m_cli_nui.value = self.cli_nui.value
         self.m_cli_tel.value = self.cli_tel.value
@@ -537,7 +615,9 @@ class Clients(ft.UserControl):
                                                    vertical_alignment=ft.CrossAxisAlignment.START),
                                             self.info_detfac,
                                             ft.Row(
-                                                [self.table_details_factures_container, self.table_paiments_container])
+                                                [self.table_details_factures_container, self.table_paiments_container],
+                                                vertical_alignment=ft.CrossAxisAlignment.START, alignment=ft.MainAxisAlignment.START
+                                            )
                                         ]
                                     ),
                                     self.new_cli_window, self.edit_cli_window
@@ -545,7 +625,7 @@ class Clients(ft.UserControl):
                             )
                         ]
                     ),
-                    self.look_clients
+                    self.select_cli_window
                 ]
             )
         )
