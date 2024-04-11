@@ -1286,7 +1286,7 @@ class Devis(ft.UserControl):
                     can.drawString(1 * cm, (y - 2) * cm, f"NB: validité de l'offre: {infos[10]} mois")
 
                 can.setFont("Helvetica", 10)
-                can.drawString(1 * cm, (y - 3) * cm, "INFOS POUR PAIEMENT")
+                can.drawString(1 * cm, (y - 3) * cm, "INFORMATIONS BANCAIRES")
                 can.setFont("Helvetica", 11)
                 can.drawString(1 * cm, (y - 3.5) * cm, f"par virement à: {ENTITE_BANQUE},   IBAN {ENTITE_IBAN}")
                 can.drawString(1 * cm, (y - 4) * cm, f"Code swift: {ENTITE_SWIFT},  Titualire: {ENTITE_NOM}")
@@ -1334,7 +1334,7 @@ class Devis(ft.UserControl):
                     can.drawString(1 * cm, (y - 2) * cm, f"NB: validité de l'offre: {infos[10]} mois")
 
                 can.setFont("Helvetica", 10)
-                can.drawString(1 * cm, (y - 3) * cm, "INFOS POUR PAIEMENT")
+                can.drawString(1 * cm, (y - 3) * cm, "INFORMATION BANCAIRES")
                 can.setFont("Helvetica", 11)
                 can.drawString(1 * cm, (y - 3.5) * cm, f"par virement à: {ENTITE_BANQUE},   IBAN {ENTITE_IBAN}")
                 can.drawString(1 * cm, (y - 4) * cm, f"Code swift: {ENTITE_SWIFT},  Titualire: {ENTITE_NOM}")
