@@ -232,7 +232,7 @@ class Devis(ft.UserControl):
                 controls=[self.print_button, self.fp2]
             )
         )
-        # # Stack ecran de creatiuon de devis________________________________________________________
+        # # Stack ecran de creatiuon de devis****************************************************************************************************
         self.n_dev = ft.TextField(**devis_num_style, disabled=True)
         self.n_cliname = ft.Dropdown(**client_name_style, on_change=self.on_change_client)
         self.n_cli_id = ft.Text(visible=False)
@@ -242,7 +242,7 @@ class Devis(ft.UserControl):
         self.up = ft.IconButton(ft.icons.ADD_CIRCLE_OUTLINE, icon_size=24, on_click=self.add_remise)
         self.down = ft.IconButton(ft.icons.REMOVE_CIRCLE_OUTLINE, icon_size=24, on_click=self.remove_remise)
         self.delai = ft.TextField(**nb_style, label="délai livraison")
-        self.ptliv = ft.TextField(**nb_style, label="point de livraison")
+        self.ptliv = ft.TextField(**liv_style, label="point de livraison")
         self.paydelay = ft.TextField(**paydelay_style, label="paiement", input_filter=ft.NumbersOnlyInputFilter())
         self.validite = ft.TextField(**paydelay_style, label="validite", input_filter=ft.NumbersOnlyInputFilter())
         self.notabene = ft.TextField(**nb_style, label="NB")
@@ -255,7 +255,8 @@ class Devis(ft.UserControl):
                 ]
             )
         )
-        self.reference = ft.Dropdown(**new_ref_style, on_change=self.on_change_ref)
+        self.reference = ft.TextField(**search_ref_style, on_change=self.changement_reference)
+        self.show_list_ref = ft.IconButton(ft.icons.IMAGE_SEARCH_OUTLINED, tooltip="rechercher", on_click=self.open_select_n_ref_windows)
         self.designation = ft.TextField(**standard_tf_style, label="designation", disabled=True)
         self.prix_stock = ft.TextField(**new_prix_style, label="prix indiqué", disabled=True)
         self.qte = ft.TextField(**new_qte_style, input_filter=ft.NumbersOnlyInputFilter())
@@ -264,15 +265,45 @@ class Devis(ft.UserControl):
         self.total_lettres = ft.TextField(**mt_lettres_style, disabled=True)
         self.button_add = ft.ElevatedButton(
             icon=ft.icons.ADD, text="Ajouter",
-            icon_color="white", color="white", height=40,
+            icon_color="white", color="white", height=50,
             bgcolor=ft.colors.BLACK87,
             on_click=self.add_table_line
+        )
+        self.filtre_n_ref = ft.TextField(**standard_tf_style, hint_text="rechercher client...", on_change=self.on_change_n_ref)
+        self.choix_n_ref = ft.Text("", visible=False)
+        self.n_table_ref = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("reference", style=ft.TextStyle(size=12, font_family="Poppins Black"))),
+                ft.DataColumn(ft.Text("designation", style=ft.TextStyle(size=12, font_family="Poppins Black"))),
+            ],
+            rows=[]
+        )
+        self.select_n_ref_window = ft.Card(
+            elevation=30, expand=True,
+            top=5, left=300,
+            height=700, width=800,
+            scale=ft.transform.Scale(scale=0),
+            animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
+            content=ft.Container(
+                padding=20,
+                bgcolor="white",
+                content=ft.Column(
+                    expand=True, height=600,
+                    controls=[
+                        ft.Text("Selectionner reference", size=20, font_family="Poppins Regular"),
+                        ft.Divider(height=20, color="transparent"),
+                        self.filtre_n_ref,
+                        self.choix_n_ref,
+                        ft.Column([self.n_table_ref], scroll=ft.ScrollMode.ADAPTIVE, height=500),
+                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                )
+            )
         )
         self.ct_second = ft.Container(
             **standard_ct_style,
             content=ft.Column(
                 [
-                    ft.Row([self.reference, self.designation]),
+                    ft.Row([self.reference, self.show_list_ref, self.designation]),
                     ft.Row([self.qte, self.prix_stock, self.prix, self.total]),
                     ft.Row([self.total_lettres, self.button_add])
                 ]
@@ -298,7 +329,7 @@ class Devis(ft.UserControl):
         self.table_new_devis = ft.DataTable(**table_new_devis_style)
         self.new_devis_window = ft.Card(
             elevation=30, expand=True,
-            top=2, left=300,
+            top=2, left=100,
             scale=ft.transform.Scale(scale=0),
             animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
             content=ft.Container(
@@ -306,16 +337,10 @@ class Devis(ft.UserControl):
                 border_radius=8,
                 opacity=1,
                 expand=True,
-                height=800,
+                height=750,
                 padding=ft.padding.all(20),
                 content=ft.Column(
                     controls=[
-                        ft.Row(
-                            [
-                                ft.Icon(ft.icons.POST_ADD_OUTLINED),
-                                ft.Text("Créer devis", style=ft.TextStyle(size=20, font_family="Poppins Regular"))
-                            ]
-                        ),
                         self.ct_first,
                         self.ct_second,
                         ft.Container(
@@ -329,20 +354,20 @@ class Devis(ft.UserControl):
                                 scroll=ft.ScrollMode.ADAPTIVE
                             )
                         ),
-                        ft.Row([self.notabene, self.delai]),
-                        ft.Row([self.ptliv, self.paydelay, self.validite]),
+                        ft.Row([self.notabene, self.paydelay, self.validite]),
+                        ft.Row([self.ptliv, self.delai]),
                         ft.Row(
                             [
                                 ft.ElevatedButton(
                                     "Valider",
                                     icon=ft.icons.CHECK_OUTLINED,
-                                    icon_color="white", color="white", bgcolor="red", height=40,
+                                    icon_color="white", color="white", bgcolor="red", height=50,
                                     on_click=self.add_new_devis
                                 ),
                                 ft.ElevatedButton(
                                     "Quitter",
                                     icon=ft.icons.ARROW_BACK_OUTLINED,
-                                    icon_color="white", color="white", bgcolor=ft.colors.BLACK87, height=40,
+                                    icon_color="white", color="white", bgcolor=ft.colors.BLACK87, height=50,
                                     on_click=self.close_new_devis_window
                                 )
                             ]
@@ -426,7 +451,8 @@ class Devis(ft.UserControl):
                 ft.FilledTonalButton(text="Fermer", on_click=self.close_confirm_bordereau)
             ]
         )
-        # fenetre de modification de devis ______________________________________________________________
+
+        # fenetre de modification de devis ***************************************************************************************************
         self.table_edit_devis = ft.DataTable(**table_edit_devis_style)
         self.m_devis = ft.TextField(**devis_num_style, disabled=True)
         self.table_container_edit = ft.Container(
@@ -434,7 +460,8 @@ class Devis(ft.UserControl):
             content=ft.Column([self.table_edit_devis], expand=True, width=600, height=100,
                               scroll=ft.ScrollMode.ADAPTIVE)
         )
-        self.m_reference = ft.Dropdown(**new_ref_style)
+        self.m_reference = ft.TextField(**search_ref_style, on_change=self.changement_m_reference)
+        self.show_list_m_ref = ft.IconButton(ft.icons.IMAGE_SEARCH_OUTLINED, tooltip="rechercher", on_click=self.open_select_m_ref_windows)
         self.id_ligne = ft.Text(visible=False)
         self.m_remise = ft.TextField(**new_remise_style)
         self.m_designation = ft.TextField(**standard_tf_style, label="designation", disabled=True)
@@ -444,7 +471,7 @@ class Devis(ft.UserControl):
         self.m_total = ft.TextField(**new_prix_style, label="total", disabled=True)
         self.m_total_lettres = ft.TextField(**mt_lettres_style, disabled=True)
         self.m_delai = ft.TextField(**nb_style, label="délai livraison")
-        self.m_ptliv = ft.TextField(**nb_style, label="point de livraison")
+        self.m_ptliv = ft.TextField(**liv_style, label="point de livraison")
         self.m_paydelay = ft.TextField(**paydelay_style, label="paiement", input_filter=ft.NumbersOnlyInputFilter())
         self.m_validite = ft.TextField(**paydelay_style, label="validite", input_filter=ft.NumbersOnlyInputFilter())
         self.m_notabene = ft.TextField(**nb_style, label="NB")
@@ -454,14 +481,44 @@ class Devis(ft.UserControl):
             bgcolor=ft.colors.BLACK87,
             on_click=self.add_table_line
         )
+
+        self.filtre_m_ref = ft.TextField(**standard_tf_style, hint_text="rechercher client...", on_change=self.on_change_m_ref)
+        self.choix_m_ref = ft.Text("", visible=False)
+        self.m_table_ref = ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("reference", style=ft.TextStyle(size=12, font_family="Poppins Black"))),
+                ft.DataColumn(ft.Text("designation", style=ft.TextStyle(size=12, font_family="Poppins Black"))),
+            ],
+            rows=[]
+        )
+        self.select_m_ref_window = ft.Card(
+            elevation=30, expand=True,
+            top=5, left=300,
+            height=700, width=800,
+            scale=ft.transform.Scale(scale=0),
+            animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
+            content=ft.Container(
+                padding=20,
+                bgcolor="white",
+                content=ft.Column(
+                    expand=True, height=600,
+                    controls=[
+                        ft.Text("Selectionner reference", size=20, font_family="Poppins Regular"),
+                        ft.Divider(height=20, color="transparent"),
+                        self.filtre_m_ref,
+                        self.choix_m_ref,
+                        ft.Column([self.m_table_ref], scroll=ft.ScrollMode.ADAPTIVE, height=500),
+                    ], horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                )
+            )
+        )
         # dialog box for add ligne
         self.mn_ref = ft.Dropdown(**new_ref_style, on_change=self.on_change_ref_ligne)
         self.mn_des = ft.TextField(**standard_tf_style, label="designation", disabled=True)
         self.mn_qte = ft.TextField(**new_qte_style, input_filter=ft.NumbersOnlyInputFilter())
         self.mn_prix_stock = ft.TextField(**new_prix_style, label="Prix indiqué", disabled=True)
         self.mn_prix = ft.TextField(**new_prix_style, label="prix", input_filter=ft.NumbersOnlyInputFilter())
-        self.mn_error = ft.Text("Veuillez remplir tous les champs",
-                                style=ft.TextStyle(size=16, font_family="Poppins Regular"), visible=False)
+        self.mn_error = ft.Text("Veuillez remplir tous les champs", style=ft.TextStyle(size=16, font_family="Poppins Regular"), visible=False)
         self.new_ligne_window = ft.AlertDialog(
             title=ft.Text("Ajouter ligne"),
             content=ft.Column([self.mn_ref, self.mn_des, self.mn_qte, self.mn_prix_stock, self.mn_prix], height=300),
@@ -505,7 +562,7 @@ class Devis(ft.UserControl):
         # edit devis card _________________________________________________________
         self.edit_devis_window = ft.Card(
             elevation=30, expand=True,
-            top=0, left=300,
+            top=0, left=100,
             scale=ft.transform.Scale(scale=0),
             animate_scale=ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_IN),
             content=ft.Container(
@@ -523,24 +580,24 @@ class Devis(ft.UserControl):
                             content=ft.Row([self.m_devis, self.m_total_lettres])
                         ),
                         self.table_container_edit,
-                        ft.Row([self.m_notabene, self.m_delai]),
-                        ft.Row([self.m_ptliv, self.m_paydelay, self.m_validite]),
+                        ft.Row([self.m_notabene, self.m_paydelay, self.m_validite]),
+                        ft.Row([self.m_ptliv, self.m_delai]),
                         ft.Container(
                             **standard_ct_style,
-                            content=ft.Row([self.id_ligne, self.m_reference, self.m_designation, self.m_qte, self.m_prix])
+                            content=ft.Row([self.id_ligne, self.m_reference, self.show_list_m_ref, self.m_designation, self.m_qte, self.m_prix])
                         ),
                         ft.Container(
                             **standard_ct_style,
                             content=ft.Row(
                                 [
                                     ft.ElevatedButton("Modifier ligne", icon=ft.icons.EDIT, icon_color="white",
-                                                      color="white", height=40, bgcolor="red",
+                                                      color="white", height=50, bgcolor=ft.colors.BLACK87,
                                                       on_click=self.update_ligne),
                                     ft.ElevatedButton("Ajouter ligne", icon=ft.icons.ADD, icon_color="white",
                                                       color="white",
-                                                      height=40, bgcolor="red", on_click=self.open_new_ligne_window),
+                                                      height=50, bgcolor=ft.colors.BLACK87, on_click=self.open_new_ligne_window),
                                     ft.ElevatedButton("Supprimer ligne", icon=ft.icons.DELETE, icon_color="white",
-                                                      color="white", height=40, bgcolor="red",
+                                                      color="white", height=50, bgcolor=ft.colors.BLACK87,
                                                       on_click=self.delete_detail_line)
                                 ]
                             )
@@ -561,7 +618,7 @@ class Devis(ft.UserControl):
                                         ]
                                     ),
                                     ft.ElevatedButton("valider remise", icon=ft.icons.EDIT, icon_color="white",
-                                                      color="white", height=40, bgcolor="red",
+                                                      color="white", height=50, bgcolor=ft.colors.BLACK87,
                                                       on_click=self.on_change_edit_remise)
                                 ],
                                 alignment="spaceBetween", expand=True
@@ -573,7 +630,7 @@ class Devis(ft.UserControl):
                                 [
                                     ft.ElevatedButton("Valider modifications",
                                                       icon=ft.icons.CHECK, icon_color="white", color="white",
-                                                      height=40, bgcolor="red", on_click=self.finish_edit_devis),
+                                                      height=50, bgcolor="red", on_click=self.finish_edit_devis),
                                 ]
                             )
                         )
@@ -584,8 +641,8 @@ class Devis(ft.UserControl):
         # fonctions à charger sans evenements ____________________________________________________________
 
         self.load_clients_list()
-        self.load_ref_list()
-        self.load_edit_ref_list()
+        self.load_n_ref()
+        self.load_m_ref()
         self.load_edit_ref_list2()
         self.load_all_client_name()
         self.show_alertes()
@@ -812,6 +869,71 @@ class Devis(ft.UserControl):
         self.valid_box.update()
 
     # second content stack nouveau devis _______________________________________________________________________________________
+
+    def open_select_n_ref_windows(self, e):
+        self.select_n_ref_window.scale = 1
+        self.select_n_ref_window.update()
+
+    def load_n_ref(self):
+        for row in self.n_table_ref.rows[:]:
+            self.n_table_ref.rows.remove(row)
+
+        datas = backend.all_ref_and_desig()
+        for data in datas:
+            self.n_table_ref.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(f"{data[0].upper()}", style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(ft.Text(f"{data[1].upper()}", style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_n_ref(e.control.cells[0].content.value)
+                )
+            )
+
+    def on_change_n_ref(self, e):
+        for row in self.n_table_ref.rows[:]:
+            self.n_table_ref.rows.remove(row)
+
+        datas = []
+        for data in backend.all_ref_and_desig():
+            dico = {"reference": data[0], "designation": data[1] }
+            datas.append(dico)
+
+        myfiler = list(filter(lambda x: self.filtre_n_ref.value.lower() in x['designation'].lower(), datas))
+
+        for row in myfiler:
+            self.n_table_ref.rows.append(
+                ft.DataRow(cells=[
+                    ft.DataCell(ft.Text(f"{row['reference']}", style=ft.TextStyle(font_family="Poppins Medium", size=12))),
+                    ft.DataCell(ft.Text(f"{row['designation']}", style=ft.TextStyle(font_family="Poppins Medium", size=12)))
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_n_ref(e.control.cells[0].content.value)
+                )
+            )
+        self.n_table_ref.update()
+
+    def on_select_change_n_ref(self, e):
+        self.choix.value = e
+        self.choix.update()
+        self.reference.value = self.choix.value
+        self.reference.update()
+        self.select_n_ref_window.scale = 0
+        self.select_n_ref_window.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
+        self.select_n_ref_window.update()
+        self.changement_reference_2()
+
+    def changement_reference(self, e):
+        self.designation.value = backend.search_designation(self.reference.value)[0]
+        self.prix_stock.value = backend.search_designation(self.reference.value)[1]
+        self.designation.update()
+        self.prix_stock.update()
+
+    def changement_reference_2(self):
+        self.designation.value = backend.search_designation(self.reference.value)[0]
+        self.prix_stock.value = backend.search_designation(self.reference.value)[1]
+        self.designation.update()
+        self.prix_stock.update()
+
     def open_new_devis_window(self, e):
         self.new_devis_window.scale = 1
         self.new_devis_window.update()
@@ -848,12 +970,6 @@ class Devis(ft.UserControl):
         self.new_devis_window.scale = 0
         self.new_devis_window.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
         self.new_devis_window.update()
-
-    def load_ref_list(self):
-        for name in backend.all_references():
-            self.reference.options.append(
-                ft.dropdown.Option(name)
-            )
 
     def load_clients_list(self):
         for name in backend.all_clients():
@@ -1025,7 +1141,8 @@ class Devis(ft.UserControl):
                 can.setFont("Helvetica", 13)
                 can.drawCentredString(5.5 * cm, 23.8 * cm, f"N°: {self.search_devis.value}")
                 can.setFont("Helvetica", 12)
-                can.drawCentredString(5.5 * cm, 23.3 * cm, f"date: {ecrire_date(self.date.value)}")
+                can.drawCentredString(5.5 * cm, 23.3 * cm, f"Suivant demande du {ecrire_date(self.date.value)}")
+
                 # infos du client
                 infos_client = backend.infos_clients(self.client_id.value)
                 # cadre des infos du client
@@ -1063,18 +1180,20 @@ class Devis(ft.UserControl):
             can.line(1 * cm, (y - 2) * cm, 20 * cm, (y - 2) * cm)
             # lignes verticales
             can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 2) * cm)
-            can.line(12.5 * cm, (y - 1) * cm, 12.5 * cm, (y - 2) * cm)
-            can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
-            can.line(15 * cm, (y - 1) * cm, 15 * cm, (y - 2) * cm)
-            can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
+            can.line(2 * cm, (y - 1) * cm, 2 * cm, (y - 2) * cm)
+            can.line(13.5 * cm, (y - 1) * cm, 13.5 * cm, (y - 2) * cm)
+            can.line(14.5 * cm, (y - 1) * cm, 14.5 * cm, (y - 2) * cm)
+            can.line(15.5 * cm, (y - 1) * cm, 15.5 * cm, (y - 2) * cm)
+            can.line(17.5 * cm, (y - 1) * cm, 17.5 * cm, (y - 2) * cm)
             can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
             # draw headers
             can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(6.75 * cm, (y - 1.6) * cm, "Désignation")
-            can.drawCentredString(13.25 * cm, (y - 1.6) * cm, "Qté")
-            can.drawCentredString(14.5 * cm, (y - 1.6) * cm, "U")
-            can.drawCentredString(16 * cm, (y - 1.6) * cm, "P.U.")
-            can.drawCentredString(18.5 * cm, (y - 1.6) * cm, "Montant")
+            can.drawCentredString(1.5 * cm, (y - 1.6) * cm, "item")
+            can.drawCentredString(7.75 * cm, (y - 1.6) * cm, "Désignation")
+            can.drawCentredString(14 * cm, (y - 1.6) * cm, "Qté")
+            can.drawCentredString(15 * cm, (y - 1.6) * cm, "U")
+            can.drawCentredString(16.5 * cm, (y - 1.6) * cm, "P.U.")
+            can.drawCentredString(18.75 * cm, (y - 1.6) * cm, "Montant")
 
             ref_list = []
             total_devis = 0
@@ -1085,26 +1204,30 @@ class Devis(ft.UserControl):
                     sous_liste.append(liste[i].cells[j].content.value)
                 ref_list.append(sous_liste)
 
+            item = 1
             for row in ref_list:
                 total_devis += row[4]
                 can.setFillColorRGB(0, 0, 0)
                 can.setFont("Helvetica", 10)
-                can.drawCentredString(6.75 * cm, (y - 2.6) * cm, f"{row[1]}")
-                can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{row[2]}")
-                can.drawCentredString(14.5 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
-                can.drawCentredString(16 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
-                can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
+                can.drawCentredString(1.5 * cm, (y - 2.6) * cm, f"{item}")
+                can.drawCentredString(7.75 * cm, (y - 2.6) * cm, f"{row[1]}")
+                can.drawCentredString(14 * cm, (y - 2.6) * cm, f"{row[2]}")
+                can.drawCentredString(15 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
+                can.drawCentredString(16.5 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
+                can.drawCentredString(18.75 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
                 # lignes verticales
                 can.setStrokeColorRGB(0, 0, 0)
-                can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
-                can.line(12.5 * cm, (y - 2) * cm, 12.5 * cm, (y - 3) * cm)
-                can.line(14 * cm, (y - 2) * cm, 14 * cm, (y - 3) * cm)
-                can.line(15 * cm, (y - 2) * cm, 15 * cm, (y - 3) * cm)
-                can.line(17 * cm, (y - 2) * cm, 17 * cm, (y - 3) * cm)
-                can.line(20 * cm, (y - 2) * cm, 20 * cm, (y - 3) * cm)
+                can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 3) * cm)
+                can.line(2 * cm, (y - 1) * cm, 2 * cm, (y - 3) * cm)
+                can.line(13.5 * cm, (y - 1) * cm, 13.5 * cm, (y - 3) * cm)
+                can.line(14.5 * cm, (y - 1) * cm, 14.5 * cm, (y - 3) * cm)
+                can.line(15.5 * cm, (y - 1) * cm, 15.5 * cm, (y - 3) * cm)
+                can.line(17.5 * cm, (y - 1) * cm, 17.5 * cm, (y - 3) * cm)
+                can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 3) * cm)
                 # lignes horizontales
                 can.setStrokeColorRGB(0, 0, 0)
                 can.line(1 * cm, (y - 3) * cm, 20 * cm, (y - 3) * cm)
+                item += 1
                 y -= 1
 
             y = y - 1.5
@@ -1137,7 +1260,7 @@ class Devis(ft.UserControl):
                 infos = backend.show_info_devis(self.search_devis.value)
 
                 can.setFont("Helvetica", 11)
-                can.drawString(1 * cm, (y - 5) * cm, "NOTA BENE:")
+                can.drawString(1 * cm, (y - 5) * cm, "NB:")
                 nb_list = infos[7].split(";")
                 if infos[7] is not None:
                     for i in range(len(nb_list) - 1):
@@ -1162,8 +1285,9 @@ class Devis(ft.UserControl):
                     can.setFont("Helvetica-Bold", 12)
                     can.drawString(1 * cm, (y - 2) * cm, f"NB: validité de l'offre: {infos[10]} mois")
 
+                can.setFont("Helvetica", 10)
+                can.drawString(1 * cm, (y - 3) * cm, "INFOS POUR PAIEMENT")
                 can.setFont("Helvetica", 11)
-                can.drawString(1 * cm, (y - 3) * cm, "PAIEMENT")
                 can.drawString(1 * cm, (y - 3.5) * cm, f"par virement à: {ENTITE_BANQUE},   IBAN {ENTITE_IBAN}")
                 can.drawString(1 * cm, (y - 4) * cm, f"Code swift: {ENTITE_SWIFT},  Titualire: {ENTITE_NOM}")
 
@@ -1184,7 +1308,7 @@ class Devis(ft.UserControl):
                 infos = backend.show_info_devis(self.search_devis.value)
 
                 can.setFont("Helvetica", 11)
-                can.drawString(1 * cm, (y - 4) * cm, "NOTA BENE:")
+                can.drawString(1 * cm, (y - 4) * cm, "NB:")
                 nb_list = infos[7].split(";")
                 if infos[7] is not None:
                     for i in range(0, len(nb_list) - 1):
@@ -1209,10 +1333,12 @@ class Devis(ft.UserControl):
                     can.setFont("Helvetica-Bold", 12)
                     can.drawString(1 * cm, (y - 2) * cm, f"NB: validité de l'offre: {infos[10]} mois")
 
+                can.setFont("Helvetica", 10)
+                can.drawString(1 * cm, (y - 3) * cm, "INFOS POUR PAIEMENT")
                 can.setFont("Helvetica", 11)
-                can.drawString(1 * cm, (y - 3) * cm, "PAIEMENT")
                 can.drawString(1 * cm, (y - 3.5) * cm, f"par virement à: {ENTITE_BANQUE},   IBAN {ENTITE_IBAN}")
                 can.drawString(1 * cm, (y - 4) * cm, f"Code swift: {ENTITE_SWIFT},  Titualire: {ENTITE_NOM}")
+
             can.save()
             self.good_impression.open = True
             self.good_impression.update()
@@ -1378,18 +1504,20 @@ class Devis(ft.UserControl):
             can.line(1 * cm, (y - 2) * cm, 20 * cm, (y - 2) * cm)
             # lignes verticales
             can.line(1 * cm, (y - 1) * cm, 1 * cm, (y - 2) * cm)
-            can.line(11 * cm, (y - 1) * cm, 11 * cm, (y - 2) * cm)
-            can.line(12.5 * cm, (y - 1) * cm, 12.5 * cm, (y - 2) * cm)
-            can.line(14 * cm, (y - 1) * cm, 14 * cm, (y - 2) * cm)
-            can.line(17 * cm, (y - 1) * cm, 17 * cm, (y - 2) * cm)
+            can.line(2 * cm, (y - 1) * cm, 2 * cm, (y - 2) * cm)
+            can.line(13.5 * cm, (y - 1) * cm, 13.5 * cm, (y - 2) * cm)
+            can.line(14.5 * cm, (y - 1) * cm, 14.5 * cm, (y - 2) * cm)
+            can.line(15.5 * cm, (y - 1) * cm, 15.5 * cm, (y - 2) * cm)
+            can.line(17.5 * cm, (y - 1) * cm, 17.5 * cm, (y - 2) * cm)
             can.line(20 * cm, (y - 1) * cm, 20 * cm, (y - 2) * cm)
             # draw headers
             can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(6 * cm, (y - 1.6) * cm, "Désignation")
-            can.drawCentredString(11.75 * cm, (y - 1.6) * cm, "Qté")
-            can.drawCentredString(13.25 * cm, (y - 1.6) * cm, "unité")
-            can.drawCentredString(15.5 * cm, (y - 1.6) * cm, "Prix unitaire")
-            can.drawCentredString(18.5 * cm, (y - 1.6) * cm, "Montant")
+            can.drawCentredString(1.5 * cm, (y - 1.6) * cm, "item")
+            can.drawCentredString(7.75 * cm, (y - 1.6) * cm, "Désignation")
+            can.drawCentredString(14 * cm, (y - 1.6) * cm, "Qté")
+            can.drawCentredString(15 * cm, (y - 1.6) * cm, "U")
+            can.drawCentredString(16.5 * cm, (y - 1.6) * cm, "P.U.")
+            can.drawCentredString(18.75 * cm, (y - 1.6) * cm, "Montant")
 
             ref_list = []
             total_devis = 0
@@ -1400,15 +1528,17 @@ class Devis(ft.UserControl):
                     sous_liste.append(liste[i].cells[j].content.value)
                 ref_list.append(sous_liste)
 
+            item = 1
             for row in ref_list:
                 total_devis += row[4]
                 can.setFillColorRGB(0, 0, 0)
                 can.setFont("Helvetica", 10)
-                can.drawCentredString(6 * cm, (y - 2.6) * cm, f"{row[1]}")
-                can.drawCentredString(11.75 * cm, (y - 2.6) * cm, f"{row[2]}")
-                can.drawCentredString(13.25 * cm, (y - 2.6) * cm, f"{backend.look_unit(row[0])}")
-                can.drawCentredString(15.5 * cm, (y - 2.6) * cm, f"{milSep(row[3])}")
-                can.drawCentredString(18.5 * cm, (y - 2.6) * cm, f"{milSep(row[4])}")
+                can.drawCentredString(1.5* cm, (y - 2.6)*cm, f"{item}")
+                can.drawCentredString(7.75* cm, (y - 2.6)*cm, f"{row[1]}")
+                can.drawCentredString(14* cm, (y - 2.6)*cm, f"{row[2]}")
+                can.drawCentredString(15* cm, (y - 2.6)*cm, f"{backend.look_unit(row[0])}")
+                can.drawCentredString(16.5 * cm, (y - 2.6)*cm, f"{milSep(row[3])}")
+                can.drawCentredString(18.75 * cm, (y - 2.6)*cm, f"{milSep(row[4])}")
                 # lignes verticales
                 can.setStrokeColorRGB(0, 0, 0)
                 can.line(1 * cm, (y - 2) * cm, 1 * cm, (y - 3) * cm)
@@ -1420,6 +1550,7 @@ class Devis(ft.UserControl):
                 # lignes horizontales
                 can.setStrokeColorRGB(0, 0, 0)
                 can.line(1 * cm, (y - 3) * cm, 20 * cm, (y - 3) * cm)
+                item += 1
                 y -= 1
 
             y = y - 1.5
@@ -1454,11 +1585,70 @@ class Devis(ft.UserControl):
         self.confirm_bordereau.update()
 
     # third content stack (modifier)___________________________________________________
-    def load_edit_ref_list(self):
-        for name in backend.all_references():
-            self.m_reference.options.append(
-                ft.dropdown.Option(name)
+
+    def open_select_m_ref_windows(self, e):
+        self.select_m_ref_window.scale = 1
+        self.select_m_ref_window.update()
+
+    def load_m_ref(self):
+        for row in self.m_table_ref.rows[:]:
+            self.m_table_ref.rows.remove(row)
+
+        datas = backend.all_ref_and_desig()
+        for data in datas:
+            self.m_table_ref.rows.append(
+                ft.DataRow(
+                    cells=[
+                        ft.DataCell(
+                            ft.Text(f"{data[0].upper()}", style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                        ft.DataCell(
+                            ft.Text(f"{data[1].upper()}", style=ft.TextStyle(font_family="poppins Medium", size=12))),
+                    ],
+                    on_select_changed=lambda e: self.on_select_change_m_ref(e.control.cells[0].content.value)
+                )
             )
+
+    def on_change_m_ref(self, e):
+        for row in self.m_table_ref.rows[:]:
+            self.m_table_ref.rows.remove(row)
+
+        datas = []
+        for data in backend.all_ref_and_desig():
+            dico = {"reference": data[0], "designation": data[1]}
+            datas.append(dico)
+
+        myfiler = list(filter(lambda x: self.filtre_m_ref.value.lower() in x['designation'].lower(), datas))
+
+        for row in myfiler:
+            self.m_table_ref.rows.append(
+                ft.DataRow(cells=[
+                    ft.DataCell(
+                        ft.Text(f"{row['reference']}", style=ft.TextStyle(font_family="Poppins Medium", size=12))),
+                    ft.DataCell(
+                        ft.Text(f"{row['designation']}", style=ft.TextStyle(font_family="Poppins Medium", size=12)))
+                ],
+                    on_select_changed=lambda e: self.on_select_change_m_ref(e.control.cells[0].content.value)
+                )
+            )
+        self.m_table_ref.update()
+
+    def on_select_change_m_ref(self, e):
+        self.choix.value = e
+        self.choix.update()
+        self.m_reference.value = self.choix.value
+        self.m_reference.update()
+        self.select_m_ref_window.scale = 0
+        self.select_m_ref_window.animate_scale = ft.Animation(duration=300, curve=ft.AnimationCurve.EASE_OUT)
+        self.select_m_ref_window.update()
+        self.changement_m_reference_2()
+
+    def changement_m_reference(self, e):
+        self.m_designation.value = backend.search_designation(self.m_reference.value)[0]
+        self.m_designation.update()
+
+    def changement_m_reference_2(self):
+        self.m_designation.value = backend.search_designation(self.m_reference.value)[0]
+        self.m_designation.update()
 
     def load_edit_ref_list2(self):
         for name in backend.all_references():
@@ -1865,6 +2055,8 @@ class Devis(ft.UserControl):
                     self.edit_devis_window,
                     self.select_cli_window,
                     self.ecran_notifs,
+                    self.select_n_ref_window,
+                    self.select_m_ref_window,
                     # dialog boxes
                     self.msg_error,
                     self.msg_confirm,

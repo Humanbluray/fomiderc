@@ -238,7 +238,19 @@ paydelay_style: dict = dict(
     content_padding=12
 )
 nb_style: dict = dict(
-    width=300,
+    width=600,
+    multiline=True,
+    height=50,
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    border_radius=0,
+    text_size=14,
+    content_padding=12
+)
+liv_style: dict = dict(
+    width=200,
     multiline=True,
     height=50,
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium"),
@@ -258,6 +270,20 @@ search_style: dict = dict(
     dense=True,
     capitalization=ft.TextCapitalization.CHARACTERS,
     text_size=14,
+    border_radius=0,
+    content_padding=12,
+    cursor_height=24
+)
+search_ref_style: dict = dict(
+    width=250,
+    height=50,
+    label="REFERENCE",
+    label_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    text_style=ft.TextStyle(font_family="Poppins Medium", size=12),
+    dense=True,
+    capitalization=ft.TextCapitalization.CHARACTERS,
+    text_size=14,
+    border_radius=0,
     content_padding=12,
     cursor_height=24
 )

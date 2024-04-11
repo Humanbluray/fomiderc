@@ -792,6 +792,17 @@ def all_references():
     return r_final
 
 
+def all_ref_and_desig():
+    conn = sql.connect(my_base)
+    cur = conn.cursor()
+    cur.execute("""SELECT reference, designation FROM articles ORDER BY reference""")
+    resultat = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return resultat
+
+
+
 def all_references_stock():
     nature = "stock"
     conn = sql.connect(my_base)
@@ -1463,7 +1474,7 @@ def delais_by_numero():
     intermediaire = []
     final = []
     date_du_jour = datetime.date.today()
-    date_du_jour = datetime.date(2024, 5, 1)
+    # date_du_jour = datetime.date(2024, 5, 1)
 
     for row in res:
         jour = row[1]
@@ -1495,7 +1506,7 @@ def delais_by_factures():
     intermediaire = []
     final = []
     date_du_jour = datetime.date.today()
-    date_du_jour = datetime.date(2024, 5, 1)
+    # date_du_jour = datetime.date(2024, 5, 1)
 
     for line in res:
         if line[2] is None:
