@@ -13,44 +13,49 @@ class Stocks(ft.UserControl):
         self.rail = ft.NavigationRail(
             selected_index=0,
             label_type=ft.NavigationRailLabelType.ALL,
-            min_width=100,
+            min_width=140,
+            min_extended_width=400,
             leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
+            indicator_color="#3410B9",
+            elevation=0,
+            bgcolor="white",
+            on_change=self.switch_page,
             destinations=[
                 ft.NavigationRailDestination(
                     icon_content=ft.Icon(ft.icons.HOME_OUTLINED),
-                    selected_icon_content=ft.Icon(ft.icons.HOME),
+                    selected_icon_content=ft.Icon(ft.icons.HOME, color="white"),
                     label_content=ft.Text("Stocks", style=ft.TextStyle(font_family="Poppins Medium"))
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.GROUP_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.GROUP),
+                    selected_icon_content=ft.Icon(ft.icons.GROUP, color="white"),
                     label_content=ft.Text("Clients", style=ft.TextStyle(font_family="Poppins Medium")),
+
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.GROUPS_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.GROUPS),
+                    selected_icon_content=ft.Icon(ft.icons.GROUPS, color="white"),
                     label_content=ft.Text("Fournisseurs", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
-                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK, color="white"),
                     label_content=ft.Text("Commandes", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.MONETIZATION_ON_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.MONETIZATION_ON),
+                    selected_icon_content=ft.Icon(ft.icons.MONETIZATION_ON, color="white"),
                     label_content=ft.Text("Devis", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.PAYMENTS_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.PAYMENTS),
+                    selected_icon_content=ft.Icon(ft.icons.PAYMENTS, color="white"),
                     label_content=ft.Text("Factures", style=ft.TextStyle(font_family="Poppins Medium")),
-                )
-            ],
-            on_change=self.switch_page
+                ),
+            ]
         )
-        self.title_page = ft.Text("STOCKS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
+        self.title_page = ft.Text("STOCKS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold", color="white"))
         # new article dialog ____________________________________________________________________
         self.n_ref = ft.TextField(**new_ref_style, label="reference")
         self.n_des = ft.TextField(**new_ref_style, label="designation")
@@ -85,7 +90,7 @@ class Stocks(ft.UserControl):
                 ft.ElevatedButton(
                     text="créer", icon=ft.icons.ADD,
                     on_click=self.add_new_ref,
-                    icon_color="white", color="white", bgcolor="red",
+                    icon_color="white", color="white", bgcolor="#3410B9",
                     height=50
                 ),
                 ft.FilledTonalButton(text="fermer", on_click=self.close_new_ref_window, height=50)
@@ -130,21 +135,21 @@ class Stocks(ft.UserControl):
             ),
             actions=[
                 ft.ElevatedButton(text="modifier", icon=ft.icons.EDIT, icon_color="white", height=50,
-                                  color="white", bgcolor="red", on_click=self.update_article),
+                                  color="white", bgcolor="#3410B9", on_click=self.update_article),
                 ft.FilledTonalButton(text="fermer", height=50, on_click=self.close_edit_article_window)
             ]
         )
         # widgets _________________________________________________________
         self.data_not_found = ft.Text(
             "Aucune donnée trouvée",
-            style=ft.TextStyle(size=14, font_family="Poppins ExtraBold", color="red"),
+            style=ft.TextStyle(size=14, font_family="Poppins ExtraBold", color="#3410B9"),
             visible=False)
         self.name_bar = ft.TextField(**name_bar_style, on_change=self.filter_data)
         self.type_bar = ft.RadioGroup(
             content=ft.Row(
                 [
-                    ft.Radio(value="stock", label="stock", active_color=ft.colors.BLACK87),
-                    ft.Radio(value="non-stock", label="non-stock", active_color=ft.colors.BLACK87)
+                    ft.Radio(value="stock", label="stock", active_color="#3410B9"),
+                    ft.Radio(value="non-stock", label="non-stock", active_color="#3410B9")
                 ]
             ),
             on_change=self.filter_data
@@ -188,7 +193,7 @@ class Stocks(ft.UserControl):
                 ft.ElevatedButton(
                     icon=ft.icons.ADD_CARD_OUTLINED,
                     text="Valider", icon_color="white",
-                    color="white", bgcolor="red",
+                    color="white", bgcolor="#3410B9",
                     height=50,
                     on_click=self.add_achat),
                 ft.FilledTonalButton(text="fermer", on_click=self.close_achat_window, height=50)
@@ -227,7 +232,7 @@ class Stocks(ft.UserControl):
             )
         )
         # end conteneur _______________________________________________________________
-        self.no_historic = ft.Text(value="Pas d'histoqrique", visible=False, style=ft.TextStyle(size=14, font_family="Poppins ExtraBold", color="red"))
+        self.no_historic = ft.Text(value="Pas d'histoqrique", visible=False, style=ft.TextStyle(size=14, font_family="Poppins ExtraBold", color="#3410B9"))
         self.info_histo = ft.Text("    Historique de", style=ft.TextStyle(color="grey", size=12, font_family="Poppins Medium"))
         self.histo_table = ft.DataTable(**table_histo_style)
         self.histo_container = ft.Container(
@@ -664,7 +669,7 @@ class Stocks(ft.UserControl):
                 height=768,
                 controls=[
                     self.rail,
-                    ft.VerticalDivider(width=20, color="#ededed"),
+                    ft.VerticalDivider(width=10, color="transparent"),
                     ft.Column(
                         expand=True,
                         height=768,

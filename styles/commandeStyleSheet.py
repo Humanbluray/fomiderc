@@ -1,7 +1,5 @@
 import flet as ft
 
-import flet as ft
-
 name_bar_style: dict = dict(
     prefix_icon=ft.icons.SEARCH,
     width=250,
@@ -162,7 +160,7 @@ drop_style: dict = dict(
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium", color=ft.colors.BLACK87),
 )
 title_container_style: dict = dict(
-    border=ft.border.all(1, color="#ebebeb"),
+    bgcolor="#3410B9",
     padding=ft.padding.only(left=10, right=10, top=5, bottom=5),
     border_radius=8,
 )

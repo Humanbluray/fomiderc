@@ -12,45 +12,50 @@ class Clients(ft.UserControl):
         self.rail = ft.NavigationRail(
             selected_index=1,
             label_type=ft.NavigationRailLabelType.ALL,
-            min_width=100,
+            min_width=140,
+            min_extended_width=400,
             leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
+            indicator_color="#3410B9",
+            elevation=0,
+            bgcolor="white",
+            on_change=self.switch_page,
             destinations=[
                 ft.NavigationRailDestination(
                     icon_content=ft.Icon(ft.icons.HOME_OUTLINED),
-                    selected_icon_content=ft.Icon(ft.icons.HOME),
+                    selected_icon_content=ft.Icon(ft.icons.HOME, color="white"),
                     label_content=ft.Text("Stocks", style=ft.TextStyle(font_family="Poppins Medium"))
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.GROUP_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.GROUP),
+                    selected_icon_content=ft.Icon(ft.icons.GROUP, color="white"),
                     label_content=ft.Text("Clients", style=ft.TextStyle(font_family="Poppins Medium")),
+
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.GROUPS_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.GROUPS),
+                    selected_icon_content=ft.Icon(ft.icons.GROUPS, color="white"),
                     label_content=ft.Text("Fournisseurs", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
-                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK, color="white"),
                     label_content=ft.Text("Commandes", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.MONETIZATION_ON_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.MONETIZATION_ON),
+                    selected_icon_content=ft.Icon(ft.icons.MONETIZATION_ON, color="white"),
                     label_content=ft.Text("Devis", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.PAYMENTS_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.PAYMENTS),
+                    selected_icon_content=ft.Icon(ft.icons.PAYMENTS, color="white"),
                     label_content=ft.Text("Factures", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
-            ],
-            on_change=self.switch_page
+            ]
         )
         # page title ____________________________________________________________________________________________________
-        self.title_page = ft.Text("CLIENTS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
+        self.title_page = ft.Text("CLIENTS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold", color="white"))
 
         # widgets du filter container ___________________________________________________________________________________
         self.client_id = ft.Text("", visible=False)
@@ -109,7 +114,7 @@ class Clients(ft.UserControl):
         self.table_factures = ft.DataTable(**table_factures_style)
         self.data_not_found = ft.Text(
             "Aucune donnée trouvée",
-            style=ft.TextStyle(size=14, font_family="Poppins ExtraBold", color="red"),
+            style=ft.TextStyle(size=14, font_family="Poppins ExtraBold", color="#3410B9"),
             visible=False
         )
         self.table_factures_container = ft.Container(
@@ -185,7 +190,7 @@ class Clients(ft.UserControl):
                 ft.ElevatedButton(
                     text="créer", icon=ft.icons.ADD,
                     on_click=self.add_client,
-                    icon_color="white", color="white", bgcolor="red",
+                    icon_color="white", color="white", bgcolor="#3410B9",
                     height=50
                 ),
                 ft.FilledTonalButton(text="fermer", on_click=self.close_new_cli_window, height=50)
@@ -213,7 +218,7 @@ class Clients(ft.UserControl):
                 ft.ElevatedButton(
                     text="Modifier", icon=ft.icons.EDIT,
                     on_click=self.update_cli,
-                    icon_color="white", color="white", bgcolor="red",
+                    icon_color="white", color="white", bgcolor="#3410B9",
                     height=50
                 ),
                 ft.FilledTonalButton(text="fermer", on_click=self.close_edit_cli_window, height=50)
@@ -599,7 +604,7 @@ class Clients(ft.UserControl):
                         height=768,
                         controls=[
                             self.rail,
-                            ft.VerticalDivider(width=20, color="#ededed"),
+                            ft.VerticalDivider(width=10, color="transparent"),
                             ft.Column(
                                 expand=True,
                                 height=768,

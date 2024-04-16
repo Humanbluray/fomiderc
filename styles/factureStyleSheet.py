@@ -7,7 +7,7 @@ filter_container_style: dict = dict(
     border_radius=8,
 )
 title_container_style: dict = dict(
-    border=ft.border.all(1, color="#ebebeb"),
+    bgcolor="#3410B9",
     padding=ft.padding.only(left=10, right=10, top=5, bottom=5),
     border_radius=8,
 )

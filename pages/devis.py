@@ -17,46 +17,49 @@ class Devis(ft.UserControl):
         self.rail = ft.NavigationRail(
             selected_index=4,
             label_type=ft.NavigationRailLabelType.ALL,
-            min_width=100,
-            # min_extended_width=400,
-            leading=ft.Text("MENU", style=ft.TextStyle(size=20, font_family="Poppins Bold",
-                                                       decoration=ft.TextDecoration.UNDERLINE)),
+            min_width=140,
+            min_extended_width=400,
+            leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
+            indicator_color="#3410B9",
+            elevation=0,
+            bgcolor="white",
+            on_change=self.switch_page,
             destinations=[
                 ft.NavigationRailDestination(
                     icon_content=ft.Icon(ft.icons.HOME_OUTLINED),
-                    selected_icon_content=ft.Icon(ft.icons.HOME),
+                    selected_icon_content=ft.Icon(ft.icons.HOME, color="white"),
                     label_content=ft.Text("Stocks", style=ft.TextStyle(font_family="Poppins Medium"))
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.GROUP_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.GROUP),
+                    selected_icon_content=ft.Icon(ft.icons.GROUP, color="white"),
                     label_content=ft.Text("Clients", style=ft.TextStyle(font_family="Poppins Medium")),
+
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.GROUPS_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.GROUPS),
+                    selected_icon_content=ft.Icon(ft.icons.GROUPS, color="white"),
                     label_content=ft.Text("Fournisseurs", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
-                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK, color="white"),
                     label_content=ft.Text("Commandes", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.MONETIZATION_ON_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.MONETIZATION_ON),
+                    selected_icon_content=ft.Icon(ft.icons.MONETIZATION_ON, color="white"),
                     label_content=ft.Text("Devis", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.PAYMENTS_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.PAYMENTS),
+                    selected_icon_content=ft.Icon(ft.icons.PAYMENTS, color="white"),
                     label_content=ft.Text("Factures", style=ft.TextStyle(font_family="Poppins Medium")),
-                )
-            ],
-            on_change=self.switch_page
+                ),
+            ]
         )
-        self.title_page = ft.Text("DEVIS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
+        self.title_page = ft.Text("DEVIS", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold", color="white"))
 
         # filtres conteneur ____________________________________________________________________________________________________
         self.filtre = ft.Text("Filtre",
@@ -65,7 +68,7 @@ class Devis(ft.UserControl):
         self.filtre_clients = ft.TextField(**standard_tf_style, hint_text="rechercher client...", on_change=self.on_change_look_clients)
         self.choix = ft.Text("", visible=False)
         self.search_devis = ft.Text("", visible=False)
-        self.aucun_devis = ft.Text("Aucun devis pour ce client", visible=False, size=12, color="red", font_family="Poppins Black")
+        self.aucun_devis = ft.Text("Aucun devis pour ce client", visible=False, size=12, color="#3410B9", font_family="Poppins Black")
         self.search_nomclient = ft.TextField(**search_style, on_change=self.changement_client)
         self.afficher_infos = ft.IconButton(ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher", on_click=self.open_select_cli_windows)
         self.chat = ft.IconButton(ft.icons.CHAT_BUBBLE_OUTLINE_SHARP, tooltip="Alertes", on_click=self.open_ecran_notifs)
@@ -105,7 +108,7 @@ class Devis(ft.UserControl):
                         ft.Column([self.table_notifs], height=300, expand=True, scroll=ft.ScrollMode.ADAPTIVE),
                         ft.Divider(height=1),
                         ft.ElevatedButton(
-                            height=50, color="white", bgcolor=ft.colors.BLACK87, text="Fermer",
+                            height=50, color="white", bgcolor="#3410B9", text="Fermer",
                             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8)),
                             on_click=self.close_ecran_notifs
                         )
@@ -145,7 +148,7 @@ class Devis(ft.UserControl):
         )
         self.list_devis_container = ft.Container(
             **standard_ct_style,
-            height=300, width=300,
+            height=300, width=270,
             content=ft.Column(
                 [self.list_devis_table, self.aucun_devis], expand=True,
                 height=300,
@@ -219,7 +222,7 @@ class Devis(ft.UserControl):
             text="Imprimer",
             height=50,
             color="white",
-            bgcolor="red",
+            bgcolor="#3410B9",
             icon=ft.icons.PRINT_OUTLINED,
             icon_color="white",
             tooltip="imprimer devis",
@@ -266,7 +269,7 @@ class Devis(ft.UserControl):
         self.button_add = ft.ElevatedButton(
             icon=ft.icons.ADD, text="Ajouter",
             icon_color="white", color="white", height=50,
-            bgcolor=ft.colors.BLACK87,
+            bgcolor="#3410B9",
             on_click=self.add_table_line
         )
         self.filtre_n_ref = ft.TextField(**standard_tf_style, hint_text="rechercher client...", on_change=self.on_change_n_ref)
@@ -361,13 +364,13 @@ class Devis(ft.UserControl):
                                 ft.ElevatedButton(
                                     "Valider",
                                     icon=ft.icons.CHECK_OUTLINED,
-                                    icon_color="white", color="white", bgcolor="red", height=50,
+                                    icon_color="white", color="white", bgcolor="#3410B9", height=50,
                                     on_click=self.add_new_devis
                                 ),
                                 ft.ElevatedButton(
                                     "Quitter",
-                                    icon=ft.icons.ARROW_BACK_OUTLINED,
-                                    icon_color="white", color="white", bgcolor=ft.colors.BLACK87, height=50,
+                                    icon=ft.icons.CLOSE,
+                                    icon_color="white", color="white", bgcolor="#3410B9", height=50,
                                     on_click=self.close_new_devis_window
                                 )
                             ]
@@ -412,8 +415,8 @@ class Devis(ft.UserControl):
             ),
             actions=[
                 ft.ElevatedButton(
-                    text="facturer", height=40, icon=ft.icons.EURO_OUTLINED, icon_color="white",
-                    color="white", bgcolor="red", on_click=self.finish_facture
+                    text="facturer", height=50, icon=ft.icons.EURO_OUTLINED, icon_color="white",
+                    color="white", bgcolor="#3410B9", on_click=self.finish_facture
                 ),
                 ft.FilledTonalButton(text="Fermer", on_click=self.close_facturer_window)
             ]
@@ -477,8 +480,8 @@ class Devis(ft.UserControl):
         self.m_notabene = ft.TextField(**nb_style, label="NB")
         self.m_button_add = ft.ElevatedButton(
             icon=ft.icons.ADD, text="Ajouter",
-            icon_color="white", color="white", height=40,
-            bgcolor=ft.colors.BLACK87,
+            icon_color="white", color="white", height=50,
+            bgcolor="#3410B9",
             on_click=self.add_table_line
         )
 
@@ -524,8 +527,8 @@ class Devis(ft.UserControl):
             content=ft.Column([self.mn_ref, self.mn_des, self.mn_qte, self.mn_prix_stock, self.mn_prix], height=300),
             actions=[
                 ft.ElevatedButton("Ajouter", icon=ft.icons.ADD, color="white", icon_color="white",
-                                  bgcolor="red", height=40, on_click=self.add_new_ligne_edit_devis),
-                ft.FilledTonalButton(text="Fermer", height=40, on_click=self.close_new_ligne_window)
+                                  bgcolor="#3410B9", height=50, on_click=self.add_new_ligne_edit_devis),
+                ft.FilledTonalButton(text="Fermer", height=50, on_click=self.close_new_ligne_window)
             ]
         )
         # sel a dialog box for mutiples errors
@@ -591,13 +594,13 @@ class Devis(ft.UserControl):
                             content=ft.Row(
                                 [
                                     ft.ElevatedButton("Modifier ligne", icon=ft.icons.EDIT, icon_color="white",
-                                                      color="white", height=50, bgcolor=ft.colors.BLACK87,
+                                                      color="white", height=50, bgcolor="#3410B9",
                                                       on_click=self.update_ligne),
                                     ft.ElevatedButton("Ajouter ligne", icon=ft.icons.ADD, icon_color="white",
                                                       color="white",
-                                                      height=50, bgcolor=ft.colors.BLACK87, on_click=self.open_new_ligne_window),
+                                                      height=50, bgcolor="#3410B9", on_click=self.open_new_ligne_window),
                                     ft.ElevatedButton("Supprimer ligne", icon=ft.icons.DELETE, icon_color="white",
-                                                      color="white", height=50, bgcolor=ft.colors.BLACK87,
+                                                      color="white", height=50, bgcolor="#3410B9",
                                                       on_click=self.delete_detail_line)
                                 ]
                             )
@@ -618,7 +621,7 @@ class Devis(ft.UserControl):
                                         ]
                                     ),
                                     ft.ElevatedButton("valider remise", icon=ft.icons.EDIT, icon_color="white",
-                                                      color="white", height=50, bgcolor=ft.colors.BLACK87,
+                                                      color="white", height=50, bgcolor="#3410B9",
                                                       on_click=self.on_change_edit_remise)
                                 ],
                                 alignment="spaceBetween", expand=True
@@ -630,7 +633,7 @@ class Devis(ft.UserControl):
                                 [
                                     ft.ElevatedButton("Valider modifications",
                                                       icon=ft.icons.CHECK, icon_color="white", color="white",
-                                                      height=50, bgcolor="red", on_click=self.finish_edit_devis),
+                                                      height=50, bgcolor="#3410B9", on_click=self.finish_edit_devis),
                                 ]
                             )
                         )
@@ -1234,73 +1237,20 @@ class Devis(ft.UserControl):
 
             can.setFillColorRGB(0, 0, 0)
             can.setFont("Helvetica-Bold", 10)
-            can.drawCentredString(16 * cm, (y - 1) * cm, "Total:")
+            can.drawCentredString(16.5 * cm, (y - 1) * cm, "Total:")
             can.setFont("Helvetica", 11)
-            can.drawCentredString(18.5 * cm, (y - 1) * cm, f"{milSep(total_devis)}")
+            can.drawCentredString(18.75 * cm, (y - 1) * cm, f"{milSep(total_devis)}")
 
-            if int(self.remise.value) != 0:
-                rem = str(self.remise.value)
-                mt_rem = int(total_devis * rem // 100)
-                net = int(total_devis - mt_rem)
-                ir = int(net * 5.5 // 100)
-                nap = int(net - ir)
-                can.setFont("Helvetica-Bold", 10)
-                can.drawCentredString(16 * cm, (y - 1.5) * cm, "Remise:")
-                can.drawCentredString(16 * cm, (y - 2) * cm, "net:")
-                can.drawCentredString(16 * cm, (y - 2.5) * cm, "IR:")
-                can.drawCentredString(16 * cm, (y - 3) * cm, "NAP:")
-
-                can.setFont("Helvetica", 11)
-                can.drawCentredString(18.5 * cm, (y - 1.5) * cm, f"{milSep(mt_rem)}")
-                can.drawCentredString(18.5 * cm, (y - 2) * cm, f"{milSep(net)}")
-                can.drawCentredString(15.5 * cm, (y - 2.5) * cm, f"{milSep(ir)}")
-                can.drawCentredString(15.5 * cm, (y - 3) * cm, f"{milSep(nap)}")
-                can.setFont("Helvetica-Bold", 11)
-                can.drawString(1 * cm, (y - 4) * cm, f"Montant total: {ecrire_en_lettres(nap)}")
-                infos = backend.show_info_devis(self.search_devis.value)
-
-                can.setFont("Helvetica", 11)
-                can.drawString(1 * cm, (y - 5) * cm, "NB:")
-                nb_list = infos[7].split(";")
-                if infos[7] is not None:
-                    for i in range(len(nb_list) - 1):
-                        can.setFont("Helvetica-Bold", 12)
-                        can.drawString(1 * cm, ((y - 5.5) - i * 0.5) * cm, f"{nb_list[i].lower()}")
-
-                y = y - 5 - len(nb_list) * 0.5
-
-                if infos[8] is not None:
-                    can.setFont("Helvetica-Bold", 12)
-                    can.drawString(1 * cm, (y - 0.5) * cm, f"Délai de livraison: {infos[8]}")
-
-                if infos[9] is not None:
-                    can.setFont("Helvetica-Bold", 12)
-                    can.drawString(1 * cm, (y - 1) * cm, f"Point de llivraison: {infos[9]}")
-
-                if infos[11] is not None:
-                    can.setFont("Helvetica-Bold", 12)
-                    can.drawString(1 * cm, (y - 1.5) * cm, f"Paiement: {infos[11]} jours après dépôt de facture")
-
-                if infos[10] is not None:
-                    can.setFont("Helvetica-Bold", 12)
-                    can.drawString(1 * cm, (y - 2) * cm, f"NB: validité de l'offre: {infos[10]} mois")
-
-                can.setFont("Helvetica", 10)
-                can.drawString(1 * cm, (y - 3) * cm, "INFORMATIONS BANCAIRES")
-                can.setFont("Helvetica", 11)
-                can.drawString(1 * cm, (y - 3.5) * cm, f"par virement à: {ENTITE_BANQUE},   IBAN {ENTITE_IBAN}")
-                can.drawString(1 * cm, (y - 4) * cm, f"Code swift: {ENTITE_SWIFT},  Titualire: {ENTITE_NOM}")
-
-            else:
+            if int(self.remise.value) == 0:
                 ir = int(total_devis * 5.5 // 100)
                 nap = int(total_devis - ir)
                 can.setFont("Helvetica-Bold", 10)
-                can.drawCentredString(16 * cm, (y - 1.5) * cm, "IR:")
-                can.drawCentredString(16 * cm, (y - 2) * cm, "NAP:")
+                can.drawCentredString(16.5 * cm, (y - 1.5) * cm, "IR:")
+                can.drawCentredString(16.5 * cm, (y - 2) * cm, "NAP:")
 
                 can.setFont("Helvetica", 11)
-                can.drawCentredString(18.5 * cm, (y - 1.5) * cm, f"{milSep(ir)} ")
-                can.drawCentredString(18.5 * cm, (y - 2) * cm, f"{milSep(nap)}")
+                can.drawCentredString(18.75 * cm, (y - 1.5) * cm, f"{milSep(ir)} ")
+                can.drawCentredString(18.75 * cm, (y - 2) * cm, f"{milSep(nap)}")
 
                 can.setFont("Helvetica-Bold", 11)
                 can.drawString(1 * cm, (y - 3) * cm, f"Montant total: {ecrire_en_lettres(nap)}")
@@ -1323,7 +1273,7 @@ class Devis(ft.UserControl):
 
                 if infos[9] is not None:
                     can.setFont("Helvetica-Bold", 12)
-                    can.drawString(1 * cm, (y - 1) * cm, f"Point de llivraison: {infos[9]}")
+                    can.drawString(1 * cm, (y - 1) * cm, f"Point de livraison: {infos[9]}")
 
                 if infos[11] is not None:
                     can.setFont("Helvetica-Bold", 12)
@@ -1331,13 +1281,67 @@ class Devis(ft.UserControl):
 
                 if infos[10] is not None:
                     can.setFont("Helvetica-Bold", 12)
-                    can.drawString(1 * cm, (y - 2) * cm, f"NB: validité de l'offre: {infos[10]} mois")
+                    can.drawString(1 * cm, (y - 2) * cm, f"validité de l'offre: {infos[10]} mois")
 
                 can.setFont("Helvetica", 10)
                 can.drawString(1 * cm, (y - 3) * cm, "INFORMATION BANCAIRES")
                 can.setFont("Helvetica", 11)
                 can.drawString(1 * cm, (y - 3.5) * cm, f"par virement à: {ENTITE_BANQUE},   IBAN {ENTITE_IBAN}")
                 can.drawString(1 * cm, (y - 4) * cm, f"Code swift: {ENTITE_SWIFT},  Titualire: {ENTITE_NOM}")
+
+            else:
+                rem = int(self.remise.value)
+                mt_rem = int(total_devis * rem // 100)
+                net = int(total_devis - mt_rem)
+                ir = int(net * 5.5 // 100)
+                nap = int(net - ir)
+                can.setFont("Helvetica-Bold", 10)
+                can.drawCentredString(16.5 * cm, (y - 1.5) * cm, "Remise:")
+                can.drawCentredString(16.5 * cm, (y - 2) * cm, "net:")
+                can.drawCentredString(16.5 * cm, (y - 2.5) * cm, "IR:")
+                can.drawCentredString(16.5 * cm, (y - 3) * cm, "NAP:")
+
+                can.setFont("Helvetica", 11)
+                can.drawCentredString(18.75 * cm, (y - 1.5) * cm, f"{milSep(mt_rem)}")
+                can.drawCentredString(18.75 * cm, (y - 2) * cm, f"{milSep(net)}")
+                can.drawCentredString(18.75 * cm, (y - 2.5) * cm, f"{milSep(ir)}")
+                can.drawCentredString(18.75 * cm, (y - 3) * cm, f"{milSep(nap)}")
+                can.setFont("Helvetica-Bold", 11)
+                can.drawString(1 * cm, (y - 4) * cm, f"Montant total: {ecrire_en_lettres(nap)}")
+                infos = backend.show_info_devis(self.search_devis.value)
+
+                can.setFont("Helvetica", 11)
+                can.drawString(1 * cm, (y - 5) * cm, "NB:")
+                nb_list = infos[7].split(";")
+                if infos[7] is not None:
+                    for i in range(len(nb_list) - 1):
+                        can.setFont("Helvetica-Bold", 12)
+                        can.drawString(1 * cm, ((y - 5.5) - i * 0.5) * cm, f"{nb_list[i].lower()}")
+
+                y = y - 5 - len(nb_list) * 0.5
+
+                if infos[8] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 0.5) * cm, f"Délai de livraison: {infos[8]}")
+
+                if infos[9] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 1) * cm, f"Point de livraison: {infos[9]}")
+
+                if infos[11] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 1.5) * cm, f"Paiement: {infos[11]} jours après dépôt de facture")
+
+                if infos[10] is not None:
+                    can.setFont("Helvetica-Bold", 12)
+                    can.drawString(1 * cm, (y - 2) * cm, f"validité de l'offre: {infos[10]} mois")
+
+                can.setFont("Helvetica", 10)
+                can.drawString(1 * cm, (y - 3) * cm, "INFORMATIONS BANCAIRES")
+                can.setFont("Helvetica", 11)
+                can.drawString(1 * cm, (y - 3.5) * cm, f"par virement à: {ENTITE_BANQUE},   IBAN {ENTITE_IBAN}")
+                can.drawString(1 * cm, (y - 4) * cm, f"Code swift: {ENTITE_SWIFT},  Titualire: {ENTITE_NOM}")
+
 
             can.save()
             self.good_impression.open = True
@@ -2034,7 +2038,7 @@ class Devis(ft.UserControl):
                             height=768,
                             controls=[
                                 self.rail,
-                                ft.VerticalDivider(width=20, color="#ededed"),
+                                ft.VerticalDivider(width=10, color="transparent"),
                                 ft.Column(
                                     expand=True,
                                     height=768,

@@ -19,49 +19,54 @@ class Commandes(ft.UserControl):
         self.rail = ft.NavigationRail(
             selected_index=3,
             label_type=ft.NavigationRailLabelType.ALL,
-            min_width=100,
+            min_width=140,
+            min_extended_width=400,
             leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
+            indicator_color="#3410B9",
+            elevation=0,
+            bgcolor="white",
+            on_change=self.switch_page,
             destinations=[
                 ft.NavigationRailDestination(
                     icon_content=ft.Icon(ft.icons.HOME_OUTLINED),
-                    selected_icon_content=ft.Icon(ft.icons.HOME),
+                    selected_icon_content=ft.Icon(ft.icons.HOME, color="white"),
                     label_content=ft.Text("Stocks", style=ft.TextStyle(font_family="Poppins Medium"))
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.GROUP_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.GROUP),
+                    selected_icon_content=ft.Icon(ft.icons.GROUP, color="white"),
                     label_content=ft.Text("Clients", style=ft.TextStyle(font_family="Poppins Medium")),
+
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.GROUPS_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.GROUPS),
+                    selected_icon_content=ft.Icon(ft.icons.GROUPS, color="white"),
                     label_content=ft.Text("Fournisseurs", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
-                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK, color="white"),
                     label_content=ft.Text("Commandes", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.MONETIZATION_ON_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.MONETIZATION_ON),
+                    selected_icon_content=ft.Icon(ft.icons.MONETIZATION_ON, color="white"),
                     label_content=ft.Text("Devis", style=ft.TextStyle(font_family="Poppins Medium")),
                 ),
                 ft.NavigationRailDestination(
                     icon=ft.icons.PAYMENTS_OUTLINED,
-                    selected_icon_content=ft.Icon(ft.icons.PAYMENTS),
+                    selected_icon_content=ft.Icon(ft.icons.PAYMENTS, color="white"),
                     label_content=ft.Text("Factures", style=ft.TextStyle(font_family="Poppins Medium")),
-                )
-            ],
-            on_change=self.switch_page
+                ),
+            ]
         )
-        self.title_page = ft.Text("COMMANDES", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold"))
+        self.title_page = ft.Text("COMMANDES", style=ft.TextStyle(size=26, font_family="Poppins ExtraBold", color="white"))
 
         self.search_commande = ft.Text("", visible=False)
         self.fournisseur_name = ft.TextField(**search_style, on_change=self.changement_client)
         self.fourniseur_id = ft.Text("", visible=False)
-        self.aucune_commande = ft.Text("Aucune commande", visible=False, size=12, color="red", font_family="Poppins Black")
+        self.aucune_commande = ft.Text("Aucune commande", visible=False, size=12, color="#3410B9", font_family="Poppins Black")
 
         self.filtre_clients = ft.TextField(**standard_tf_style, hint_text="rechercher fourniseur...",
                                            on_change=self.on_change_look_clients)
@@ -230,7 +235,7 @@ class Commandes(ft.UserControl):
                                 ft.ElevatedButton(
                                     "Valider",
                                     icon=ft.icons.CHECK_OUTLINED,
-                                    icon_color="white", color="white", bgcolor="red", height=40,
+                                    icon_color="white", color="white", bgcolor="#3410B9", height=40,
                                     on_click=self.valider_commande
                                 ),
                                 ft.ElevatedButton(
@@ -278,7 +283,7 @@ class Commandes(ft.UserControl):
             ),
             actions=[
                 ft.ElevatedButton(
-                    text="Valider réception", color="white", bgcolor="red", height=50,
+                    text="Valider réception", color="white", bgcolor="#3410B9", height=50,
                     icon=ft.icons.INVENTORY_OUTLINED, icon_color="white", on_click=self.create_receipt
                 ),
                 ft.FilledTonalButton(
@@ -842,7 +847,7 @@ class Commandes(ft.UserControl):
                             height=768,
                             controls=[
                                 self.rail,
-                                ft.VerticalDivider(width=20, color="#ededed"),
+                                ft.VerticalDivider(width=10, color="transparent"),
                                 ft.Column(
                                     expand=True,
                                     height=768,

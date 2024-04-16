@@ -45,6 +45,6 @@ button_connect_style: dict = dict(
     height=50,
     width=200,
     color="white",
-    bgcolor=ft.colors.BLACK87,
+    bgcolor="#3410B9",
     elevation=10,
 )

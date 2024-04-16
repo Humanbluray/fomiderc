@@ -13,7 +13,7 @@ class Accueil(ft.UserControl):
         self.button = ft.ElevatedButton(
             **button_connect_style,
             on_click=self.connect,
-            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
+            style=ft.ButtonStyle(shape=ft.ContinuousRectangleBorder(radius=5)),
             content=ft.Text("Connecter", size=14, font_family="Poppins Bold")
         )
         self.alert = ft.AlertDialog(
