@@ -1,6 +1,5 @@
 import sqlite3 as sql
 import datetime
-from others.useful_fonctions import convertir_date_en_objet
 
 today = datetime.date.today()
 my_base = "facturier.db"

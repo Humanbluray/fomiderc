@@ -6,7 +6,7 @@ class Accueil(ft.UserControl):
     def __init__(self, page):
         super(Accueil, self).__init__()
         self.page = page
-        self.logo = ft.Image(src="assets/logo.jpg")
+        self.logo = ft.Image(src="../assets/logo.jpg")
         self.login = ft.TextField(**loginstyle)
         self.password = ft.TextField(**passwordstyle, on_change=self.check_connexion)
         self.check_password_icon = ft.Icon(**check_password_icon_style)

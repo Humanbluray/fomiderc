@@ -140,6 +140,14 @@ client_name_style: dict = dict(
     text_style=ft.TextStyle(size=12, font_family="Poppins Medium", color=ft.colors.BLACK87),
     label_style=ft.TextStyle(size=11, font_family="Poppins Medium", color=ft.colors.BLACK87),
 )
+devise_choice_style: dict = dict(
+    width=350,
+    label="Devise",
+    value="FCFA",
+    height=40, dense=True,
+    text_style=ft.TextStyle(size=12, font_family="Poppins Medium", color=ft.colors.BLACK87),
+    label_style=ft.TextStyle(size=11, font_family="Poppins Medium", color=ft.colors.BLACK87),
+)
 new_remise_style: dict = dict(
     width=70,
     label="Remise",

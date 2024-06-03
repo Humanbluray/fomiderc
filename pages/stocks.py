@@ -18,6 +18,7 @@ class Stocks(ft.UserControl):
             leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             indicator_color="#3410B9",
+            indicator_shape=ft.ContinuousRectangleBorder(radius=20),
             elevation=0,
             bgcolor="white",
             on_change=self.switch_page,
@@ -157,14 +158,14 @@ class Stocks(ft.UserControl):
         self.table_stocks = ft.DataTable(**table_stocks_style)
 
         # icones ____________________________________________________________________
-        self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, on_click=self.open_new_ref_window, tooltip="Créer référence")
-        self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier référence", on_click=self.open_edit_article_window)
-        self.achat = ft.IconButton(icon=ft.icons.ADD_CARD_OUTLINED, tooltip="Entrée directe", on_click=self.open_achat_window)
-        self.delete = ft.IconButton(icon=ft.icons.DELETE_OUTLINED, tooltip="supprimer référence", on_click=self.delete_reference)
+        self.add = ft.IconButton(icon_color="black", icon=ft.icons.ADD_OUTLINED, on_click=self.open_new_ref_window, tooltip="Créer référence")
+        self.edit = ft.IconButton(icon_color="black", icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier référence", on_click=self.open_edit_article_window)
+        self.achat = ft.IconButton(icon_color="black", icon=ft.icons.ADD_CARD_OUTLINED, tooltip="Entrée directe", on_click=self.open_achat_window)
+        self.delete = ft.IconButton(icon_color="black", icon=ft.icons.DELETE_OUTLINED, tooltip="supprimer référence", on_click=self.delete_reference)
         self.save_me = ft.FilePicker(on_result=self.extraire_stock)
-        self.stock_bt = ft.IconButton(ft.icons.UPLOAD_FILE_OUTLINED, tooltip="Extraction excel du stock", on_click=lambda e: self.save_me.save_file())
+        self.stock_bt = ft.IconButton(icon_color="black", icon=ft.icons.UPLOAD_FILE_OUTLINED, tooltip="Extraction excel du stock", on_click=lambda e: self.save_me.save_file())
         self.save_histo = ft.FilePicker(on_result=self.extraire_historique)
-        self.histo_bt = ft.IconButton(ft.icons.FILE_OPEN, tooltip="Extraction excel de l'historique", on_click=lambda e: self.save_histo.save_file())
+        self.histo_bt = ft.IconButton(icon_color="black", icon=ft.icons.FILE_OPEN, tooltip="Extraction excel de l'historique", on_click=lambda e: self.save_histo.save_file())
 
         # actions achat direct_______________________________________________________
         self.a_ref = ft.Dropdown(**achat_ref_style, on_change=self.on_change_achat_ref)
@@ -311,6 +312,7 @@ class Stocks(ft.UserControl):
 
         if self.type_bar.value is None:
             myfiler = list(filter(lambda x: search_name.lower() in x['designation'].lower(), datas))
+
             if len(myfiler) > 0:
                 for data in myfiler:
                     self.table_stocks.rows.append(

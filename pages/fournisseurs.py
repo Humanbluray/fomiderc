@@ -17,6 +17,7 @@ class Fournisseurs(ft.UserControl):
             leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             indicator_color="#3410B9",
+            indicator_shape=ft.ContinuousRectangleBorder(radius=20),
             elevation=0,
             bgcolor="white",
             on_change=self.switch_page,
@@ -63,7 +64,7 @@ class Fournisseurs(ft.UserControl):
 
         self.filtre_clients = ft.TextField(**standard_tf_style, hint_text="rechercher fourniseur...", on_change=self.on_change_look_clients)
         self.choix = ft.Text("", visible=False)
-        self.afficher_infos = ft.IconButton(ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher", on_click=self.open_select_cli_windows)
+        self.afficher_infos = ft.IconButton(icon_color="black", icon=ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher", on_click=self.open_select_cli_windows)
         self.look_table = ft.DataTable(
             columns=[ft.DataColumn(ft.Text("Nom fournisseur", style=ft.TextStyle(size=12, font_family="Poppins Black")))],
             rows=[]
@@ -90,8 +91,8 @@ class Fournisseurs(ft.UserControl):
             )
         )
         self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
-        self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer fournisseur", on_click=self.open_new_fournisseur_window)
-        self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier fournisseur", on_click=self.open_edit_fournisseur_window)
+        self.add = ft.IconButton(icon_color="black", icon=ft.icons.ADD_OUTLINED, tooltip="Créer fournisseur", on_click=self.open_new_fournisseur_window)
+        self.edit = ft.IconButton(icon_color="black", icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier fournisseur", on_click=self.open_edit_fournisseur_window)
 
         self.filter_container = ft.Container(
                 **filter_container_style,

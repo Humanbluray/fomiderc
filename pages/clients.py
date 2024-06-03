@@ -17,6 +17,7 @@ class Clients(ft.UserControl):
             leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             indicator_color="#3410B9",
+            indicator_shape=ft.ContinuousRectangleBorder(radius=20),
             elevation=0,
             bgcolor="white",
             on_change=self.switch_page,
@@ -63,7 +64,7 @@ class Clients(ft.UserControl):
                                            on_change=self.on_change_look_clients)
         self.choix = ft.Text("", visible=False)
         self.search_nomclient = ft.TextField(**search_style, on_change=self.changement_client)
-        self.afficher_infos = ft.IconButton(ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher",
+        self.afficher_infos = ft.IconButton(icon_color="black", icon=ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher",
                                             on_click=self.open_select_cli_windows)
         self.look_table = ft.DataTable(
             columns=[ft.DataColumn(ft.Text("Nom client", style=ft.TextStyle(size=12, font_family="Poppins Black")))],
@@ -92,8 +93,8 @@ class Clients(ft.UserControl):
         )
         # actions
         self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
-        self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer client", on_click=self.open_new_cli_window)
-        self.edit = ft.IconButton(icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier client", on_click=self.open_edit_cli_window)
+        self.add = ft.IconButton(icon_color="black", icon=ft.icons.ADD_OUTLINED, tooltip="Créer client", on_click=self.open_new_cli_window)
+        self.edit = ft.IconButton(icon_color="black", icon=ft.icons.EDIT_OUTLINED, tooltip="Modifier client", on_click=self.open_edit_cli_window)
 
         self.filter_container = ft.Container(
             **filter_container_style,

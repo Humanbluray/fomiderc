@@ -1,6 +1,6 @@
 import backend
 from styles.commandeStyleSheet import *
-from others.useful_fonctions import *
+from useful_fonctions import *
 from datetime import date, datetime
 import pandas
 import os
@@ -24,6 +24,7 @@ class Commandes(ft.UserControl):
             leading=ft.Image(src="logo.jpg", height=80, width=80),
             group_alignment=-0.7,
             indicator_color="#3410B9",
+            indicator_shape=ft.ContinuousRectangleBorder(radius=20),
             elevation=0,
             bgcolor="white",
             on_change=self.switch_page,
@@ -71,7 +72,7 @@ class Commandes(ft.UserControl):
         self.filtre_clients = ft.TextField(**standard_tf_style, hint_text="rechercher fourniseur...",
                                            on_change=self.on_change_look_clients)
         self.choix = ft.Text("", visible=False)
-        self.afficher_infos = ft.IconButton(ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher",
+        self.afficher_infos = ft.IconButton(icon_color="black", icon=ft.icons.PERSON_SEARCH_OUTLINED, tooltip="rechercher",
                                             on_click=self.open_select_cli_windows)
         self.look_table = ft.DataTable(
             columns=[
@@ -101,17 +102,17 @@ class Commandes(ft.UserControl):
         )
 
         self.actions = ft.Text("actions", style=ft.TextStyle(font_family="Poppins Medium", size=12, italic=True, color="#ebebeb"))
-        self.add = ft.IconButton(icon=ft.icons.ADD_OUTLINED, tooltip="Créer commande", on_click=self.open_new_commande_window)
-        self.receive = ft.IconButton(icon=ft.icons.INVENTORY_OUTLINED, tooltip="Modifier commande", on_click=self.open_receipt_window)
+        self.add = ft.IconButton(icon_color="black", icon=ft.icons.ADD_OUTLINED, tooltip="Créer commande", on_click=self.open_new_commande_window)
+        self.receive = ft.IconButton(icon_color="black", icon=ft.icons.INVENTORY_OUTLINED, tooltip="Modifier commande", on_click=self.open_receipt_window)
 
         self.save_commandes = ft.FilePicker(on_result=self.extract_commandes)
         self.save_details_com = ft.FilePicker(on_result=self.extract_details_commandes)
-        self.cmd_bt = ft.IconButton(ft.icons.UPLOAD_FILE_OUTLINED, tooltip="extraction excel des commandes",
+        self.cmd_bt = ft.IconButton(icon_color="black", icon=ft.icons.UPLOAD_FILE_OUTLINED, tooltip="extraction excel des commandes",
                                     on_click=lambda e: self.save_commandes.save_file(allowed_extensions=["pdf"]))
-        self.details_cmd_bt = ft.IconButton(ft.icons.FILE_OPEN, tooltip="extraction excel des details de commandes",
+        self.details_cmd_bt = ft.IconButton(icon_color="black", icon=ft.icons.FILE_OPEN, tooltip="extraction excel des details de commandes",
                                             on_click=lambda e: self.save_details_com.save_file())
         self.fp = ft.FilePicker(on_result=self.imprimer_bon_commande)
-        self.print_bc = ft.IconButton(ft.icons.PRINT_OUTLINED, on_click=lambda e: self.fp.save_file())
+        self.print_bc = ft.IconButton(icon_color="black", icon=ft.icons.PRINT_OUTLINED, on_click=lambda e: self.fp.save_file())
 
         self.filter_container = ft.Container(
             **filter_container_style,
@@ -308,6 +309,7 @@ class Commandes(ft.UserControl):
         # Fonctions à charger sans évènements
 
         self.load_all_fournisseurs_name()
+        self.load_fournisseur()
         self.load_edit_ref_list()
 
     # functions __________________________________________________________________________________________
@@ -317,6 +319,13 @@ class Commandes(ft.UserControl):
             "devis", "factures"
         ]
         self.page.go(f"/{pages[e.control.selected_index]}")
+
+    def load_fournisseur(self):
+        datas = backend.all_fournisseur_name()
+        for fournisseur in datas:
+            self.n_fournisseur.options.append(
+                ft.dropdown.Option(fournisseur)
+            )
 
     def open_select_cli_windows(self, e):
         self.select_cli_window.scale = 1
