@@ -347,8 +347,7 @@ class Stocks(ft.UserControl):
             self.table_stocks.update()
         else:
             myfiler = list(filter(
-                lambda x: search_name.lower() in x['designation'].lower() and search_type.lower() in x[
-                    'nature'].lower(), datas))
+                lambda x: search_name.lower() in x['designation'].lower() and search_type.lower() in x['nature'].lower(), datas))
             if len(myfiler) > 0:
                 for data in myfiler:
                     self.table_stocks.rows.append(
