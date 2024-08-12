@@ -1,5 +1,5 @@
 import backend
-from styles.stocksStyleSheets import *
+from stocksStyleSheets import *
 import pandas
 
 

@@ -1,5 +1,5 @@
 import backend
-from styles.clientStyleSheet import *
+from clientStyleSheet import *
 
 
 class Clients(ft.UserControl):

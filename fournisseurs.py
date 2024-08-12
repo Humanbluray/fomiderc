@@ -1,5 +1,5 @@
 import backend
-from styles.fournisseursStyleSheet import *
+from fournisseursStyleSheet import *
 
 
 class Fournisseurs(ft.UserControl):

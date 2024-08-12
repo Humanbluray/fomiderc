@@ -1,12 +1,12 @@
 import backend
-from styles.accueilStyleSheet import *
+from accueilStyleSheet import *
 
 
 class Accueil(ft.UserControl):
     def __init__(self, page):
         super(Accueil, self).__init__()
         self.page = page
-        self.logo = ft.Image(src="../assets/logo.jpg")
+        self.logo = ft.Image(src="assets/logo.jpg")
         self.login = ft.TextField(**loginstyle)
         self.password = ft.TextField(**passwordstyle, on_change=self.check_connexion)
         self.check_password_icon = ft.Icon(**check_password_icon_style)
@@ -55,15 +55,16 @@ class Accueil(ft.UserControl):
 
     # when we press the button to connect
     def connect(self, e):
-        if self.login.value == "" or self.password.value == "":
-            self.alert.open = True
-            self.alert.update()
-        else:
-            if (self.login.value, self.password.value) in backend.all_users():
-                self.page.go('/stocks')
-            else:
-                self.alert.open = True
-                self.alert.update()
+        self.page.go('/stocks')
+        # if self.login.value == "" or self.password.value == "":
+        #     self.alert.open = True
+        #     self.alert.update()
+        # else:
+        #     if (self.login.value, self.password.value) in backend.all_users():
+        #         self.page.go('/stocks')
+        #     else:
+        #         self.alert.open = True
+        #         self.alert.update()
 
     def check_connexion(self, e):
         # connexion

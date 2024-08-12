@@ -1,6 +1,6 @@
 import backend
-from styles.commandeStyleSheet import *
-from others.useful_fonctions import *
+from commandeStyleSheet import *
+from useful_fonctions import *
 from datetime import date, datetime
 import pandas
 import os

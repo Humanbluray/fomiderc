@@ -1,6 +1,6 @@
 import backend
-from styles.factureStyleSheet import *
-from others.useful_fonctions import *
+from factureStyleSheet import *
+from useful_fonctions import *
 import os
 from datetime import datetime
 from reportlab.pdfgen.canvas import Canvas

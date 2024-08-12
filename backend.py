@@ -247,7 +247,7 @@ def delete_devis(numero):
 def find_devis_num(id_client):
     conn = sql.connect(my_base)
     cur = conn.cursor()
-    cur.execute("""SELECT count(id) FROM devis WHERE client=?""", (id_client,))
+    cur.execute("""SELECT count(id) FROM devis""")
     resultat = cur.fetchone()
     r_final = ""
 
