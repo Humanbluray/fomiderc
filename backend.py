@@ -575,7 +575,7 @@ def nb_factures():
 def find_facture_num(id_client):
     conn = sql.connect(my_base)
     cur = conn.cursor()
-    cur.execute("""SELECT count(id) FROM factures WHERE client=?""", (id_client,))
+    cur.execute("""SELECT count(id) FROM factures""")
     resultat = cur.fetchone()
     ini_cli = search_initiales(id_client)
 

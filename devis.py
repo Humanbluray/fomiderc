@@ -1768,30 +1768,6 @@ class Devis(ft.UserControl):
 
                     can.save()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def close_good_impression(self, e):
         self.good_impression.open = False
         self.good_impression.update()
@@ -1898,8 +1874,7 @@ class Devis(ft.UserControl):
                 entete = "assets/header.png"
                 signature = "assets/signature.png"
                 footer = "assets/footer.png"
-                # dessin logo et dignature
-                # can.drawImage(logo, 1.5 * cm, 26 * cm)
+
                 can.drawImage(entete, 0 * cm, 26.5 * cm)
                 can.drawImage(footer, 0 * cm, 0 * cm)
                 can.drawImage(signature, 12*cm, 2*cm)
