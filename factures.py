@@ -622,7 +622,7 @@ class Factures(ft.UserControl):
             self.bad_impression.open = True
             self.bad_impression.update()
         else:
-            if self.ir_inactive.value is False:
+            if self.ir_inactive.value:
                 fac = self.search_facture.value
                 ref_list = backend.search_factures_details(fac)
                 infos_client = backend.infos_clients(self.client_id.value)
@@ -748,8 +748,8 @@ class Factures(ft.UserControl):
                         tva = int(total_devis * 19.25 / 100)
                         ttc = int(total_devis + tva)
                         can.setFont("Poppins Italic", 10)
-                        can.drawRightString(15.5 * cm, (y - 1.5) * cm, "TVA (19.25%):")
-                        can.drawRightString(15.5 * cm, (y-2) * cm, "Montant TTC:")
+                        can.drawRightString(15.5 * cm, (y - 1.5) * cm, "TVA :")
+                        can.drawRightString(15.5 * cm, (y-2) * cm, "Montant TTC :")
 
                         can.setFont("Poppins Medium", 11)
                         can.drawString(16*cm, (y - 1.5) * cm, f"{milSep(tva)} ")
@@ -782,10 +782,10 @@ class Factures(ft.UserControl):
                         tva = int(net * 19.25 / 100)
                         ttc = int(net + tva)
                         can.setFont("Poppins Italic", 10)
-                        can.drawRightString(15.5*cm, (y - 1.5) * cm, "Remise:")
-                        can.drawRightString(15.5*cm, (y-2) * cm, "Après remise:")
-                        can.drawRightString(15.5*cm, (y - 2.5) * cm, "TVA (19.25%):")
-                        can.drawRightString(15.5*cm, (y-3) * cm, "Montant TTC:")
+                        can.drawRightString(15.5*cm, (y - 1.5) * cm, "Remise :")
+                        can.drawRightString(15.5*cm, (y-2) * cm, "Après remise :")
+                        can.drawRightString(15.5*cm, (y - 2.5) * cm, "TVA :")
+                        can.drawRightString(15.5*cm, (y-3) * cm, "Montant TTC :")
 
                         can.setFont("Poppins Medium", 11)
                         can.drawString(16*cm, (y - 1.5) * cm, f"{milSep(mt_rem)}")
@@ -941,13 +941,13 @@ class Factures(ft.UserControl):
                     if remm == 0:
                         tva = int(total_devis * 19.25 / 100)
                         ttc = total_devis + tva
-                        ir = int(ttc * 2.2 // 100)
-                        nap = int(ttc - ir)
+                        ir = int(total_devis * 2.2 // 100)
+                        nap = int(total_devis - ir + tva)
                         can.setFont("Poppins Italic", 10)
-                        can.drawRightString(15.5*cm, (y - 1.5) * cm, "TVA (19.25%):")
-                        can.drawRightString(15.5*cm, (y-2) * cm, "Montant TTC:")
-                        can.drawRightString(15.5*cm, (y - 2.5) * cm, "IR (2.2%):")
-                        can.drawRightString(15.5*cm, (y-3) * cm, "NAP:")
+                        can.drawRightString(15.5*cm, (y - 1.5) * cm, "TVA :")
+                        can.drawRightString(15.5*cm, (y-2) * cm, "Montant TTC :")
+                        can.drawRightString(15.5*cm, (y - 2.5) * cm, "IR :")
+                        can.drawRightString(15.5*cm, (y-3) * cm, "NAP :")
 
                         can.setFont("Poppins Medium", 11)
                         can.drawString(16*cm, (y - 1.5) * cm, f"{milSep(tva)} ")
@@ -981,15 +981,15 @@ class Factures(ft.UserControl):
                         remise = int(total_devis - rem)
                         tva = int(remise * 19.25 / 100)
                         ttc = total_devis + tva
-                        ir = int(ttc * 2.2 // 100)
-                        nap = int(ttc - ir)
+                        ir = int(remise * 2.2 // 100)
+                        nap = int(remise - ir + tva)
                         can.setFont("Poppins Italic", 10)
-                        can.drawRightString(15.5*cm, (y-1.5) * cm, f"Remise ({remm}%):")
-                        can.drawRightString(15.5*cm, (y-2) * cm, f"Après remise:")
-                        can.drawRightString(15.5*cm, (y-2.5) * cm, "TVA (19.25%):")
-                        can.drawRightString(15.5*cm, (y-3) * cm, "Montant TTC:")
-                        can.drawRightString(15.5*cm, (y-3.5) * cm, "IR (2.2%):")
-                        can.drawRightString(15.5*cm, (y-4) * cm, "NAP:")
+                        can.drawRightString(15.5*cm, (y-1.5) * cm, f"Remise ({remm}%) :")
+                        can.drawRightString(15.5*cm, (y-2) * cm, f"Après remise :")
+                        can.drawRightString(15.5*cm, (y-2.5) * cm, "TVA :")
+                        can.drawRightString(15.5*cm, (y-3) * cm, "Montant TTC :")
+                        can.drawRightString(15.5*cm, (y-3.5) * cm, "IR :")
+                        can.drawRightString(15.5*cm, (y-4) * cm, "NAP :")
 
                         can.setFont("Poppins Medium", 11)
                         can.drawString(16*cm, (y-1.5) * cm, f"{milSep(rem)} ")
